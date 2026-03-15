@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, RefreshCw } from "lucide-react";
 import loopaiLogo from "@/assets/loopai-logo.png";
+import DisplayModeSelector from "@/components/DisplayModeSelector";
 
 export default function LandingPage() {
   const navigate = useNavigate();
