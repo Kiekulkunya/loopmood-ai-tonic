@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Mail, Clock, CheckCircle2, XCircle, Send, RotateCcw,
   Calendar, Settings, Play, Pause, AlertTriangle,
   FileText, Users, TrendingUp, Target, Building2, Rocket, Crown,
-  Sparkles, Shield,
+  Sparkles, Shield, Download,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useApp } from "@/contexts/AppContext";
+import { downloadAsImage } from "@/lib/downloadUtils";
 
 interface EmailLog {
   id: string;
