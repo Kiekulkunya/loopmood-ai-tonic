@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useDisplay } from "@/contexts/DisplayContext";
 
 interface Message {
   role: "user" | "ai";
