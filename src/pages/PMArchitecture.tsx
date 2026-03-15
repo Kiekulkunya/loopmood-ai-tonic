@@ -389,13 +389,14 @@ export default function PMArchitecture() {
   const [activeLayer, setActiveLayer] = useState<string | null>(null);
   const [showFlows, setShowFlows] = useState(true);
   const [flowFilter, setFlowFilter] = useState<string | null>(null);
+  const archRef = useRef<HTMLDivElement>(null);
 
   const filteredFlows = flowFilter
     ? DATA_FLOWS.filter((f) => f.type === flowFilter)
     : DATA_FLOWS;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={archRef}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
