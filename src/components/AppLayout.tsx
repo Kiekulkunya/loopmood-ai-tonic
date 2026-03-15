@@ -22,7 +22,7 @@ const USER_NAV = [
   { label: "Startup Classifier", icon: FlaskConical, path: "/app/classifier" },
   { label: "Decoded X Return", icon: TrendingUp, path: "/app/decoded-x-return" },
   { label: "Unleashing Risk & PWMOIC", icon: Zap, path: "/app/risk-pwmoic" },
-  { label: "Startup Valuation", icon: Target, path: "/app/valuation" },
+  { label: "Valuation Simulator", icon: Target, path: "/app/valuation" },
   { label: "Nova Dashboard", icon: BarChart3, path: "/app/nova-dashboard" },
 ];
 
