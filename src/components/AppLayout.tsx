@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   FlaskConical,
@@ -14,6 +14,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { ChatbotFAB } from "@/components/Chatbot";
+import ToastContainer from "@/components/ToastContainer";
+import { useApp } from "@/contexts/AppContext";
 
 const USER_NAV = [
   { label: "Startup Classifier", icon: FlaskConical, path: "/app/classifier" },
@@ -45,9 +48,14 @@ export default function AppLayout() {
   const [session, setSession] = useState<"user" | "pm">("user");
   const location = useLocation();
   const navigate = useNavigate();
+  const { provider, logAct } = useApp();
 
   const navItems = session === "user" ? USER_NAV : PM_NAV;
   const pageTitle = PAGE_TITLES[location.pathname] || "LoopAI";
+
+  useEffect(() => {
+    logAct("page_view", location.pathname);
+  }, [location.pathname, logAct]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -79,7 +87,7 @@ export default function AppLayout() {
         {!collapsed && (
           <div className="flex gap-1 p-2">
             <button
-              onClick={() => setSession("user")}
+              onClick={() => { setSession("user"); navigate("/app/classifier"); }}
               className={`flex-1 rounded px-3 py-1.5 text-xs font-medium transition-colors ${
                 session === "user"
                   ? "bg-primary text-primary-foreground"
@@ -89,7 +97,7 @@ export default function AppLayout() {
               User
             </button>
             <button
-              onClick={() => setSession("pm")}
+              onClick={() => { setSession("pm"); navigate("/app/pm/log"); }}
               className={`flex-1 rounded px-3 py-1.5 text-xs font-medium transition-colors ${
                 session === "pm"
                   ? "bg-primary text-primary-foreground"
@@ -130,7 +138,10 @@ export default function AppLayout() {
             <Settings size={16} className="shrink-0" />
             {!collapsed && <span>Settings</span>}
           </button>
-          <button className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-destructive transition-colors">
+          <button
+            onClick={() => navigate("/")}
+            className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-destructive transition-colors"
+          >
             <LogOut size={16} className="shrink-0" />
             {!collapsed && <span>Logout</span>}
           </button>
@@ -143,8 +154,12 @@ export default function AppLayout() {
         <header className="flex items-center justify-between border-b border-border bg-sidebar px-4 py-2.5">
           <h1 className="text-sm font-semibold text-foreground">{pageTitle}</h1>
           <div className="flex items-center gap-3">
-            <span className="rounded-full bg-warning/15 px-2.5 py-0.5 text-[11px] font-medium text-warning">
-              Mock Mode
+            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+              provider === "mock"
+                ? "bg-warning/15 text-warning"
+                : "bg-accent/15 text-accent"
+            }`}>
+              {provider === "mock" ? "Mock Mode" : `AI: ${provider}`}
             </span>
           </div>
         </header>
@@ -159,6 +174,10 @@ export default function AppLayout() {
           LoopAI for TECH 41 Stanford · Educational Purpose Only · © 2025
         </footer>
       </div>
+
+      {/* Chatbot FAB */}
+      <ChatbotFAB />
+      <ToastContainer />
     </div>
   );
 }

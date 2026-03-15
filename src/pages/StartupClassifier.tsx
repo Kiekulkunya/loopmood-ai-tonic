@@ -109,6 +109,7 @@ export default function StartupClassifier() {
   return (
     <div className="animate-fade-in p-6">
       <div className="mx-auto max-w-6xl">
+        <Toolbar title="Startup Classifier" onRefresh={handleReset} />
         {/* Two Column Layout */}
         <div className="grid gap-6 lg:grid-cols-[55fr_45fr]">
           {/* Left Column */}
