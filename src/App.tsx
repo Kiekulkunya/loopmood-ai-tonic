@@ -44,7 +44,8 @@ const App = () => (
                 <Route path="nova-dashboard" element={<NovaDashboard />} />
                 <Route path="pm/log" element={<PMLog />} />
                 <Route path="pm/traffic" element={<PMTraffic />} />
-                <Route path="pm/dashboard" element={<PMDashboard />} />
+              <Route path="pm/dashboard" element={<PMDashboard />} />
+              <Route path="pm/architecture" element={<PMArchitecture />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
