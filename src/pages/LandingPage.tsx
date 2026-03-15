@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Database } from "lucide-react";
-
-const HERO_IMAGE_URL = "https://images.unsplash.com/photo-1551288049-bbbda536339a?q=80&w=2070&auto=format&fit=crop";
+import loopaiLogo from "@/assets/loopai-logo.png";
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -32,10 +31,10 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="relative">
+        <div className="relative flex items-center justify-center">
           <div className="absolute -inset-4 bg-primary/20 blur-[100px] rounded-full" />
-          <div className="relative bg-card/40 backdrop-blur-3xl border border-border/30 rounded-3xl overflow-hidden shadow-2xl">
-            <img src={HERO_IMAGE_URL} alt="LoopAI Visual" className="w-full h-auto object-cover opacity-60 grayscale hover:grayscale-0 transition-all duration-700" />
+          <div className="relative bg-card/40 backdrop-blur-3xl border border-border/30 rounded-3xl overflow-hidden shadow-2xl p-8">
+            <img src={loopaiLogo} alt="LoopAI by TuringFin" className="w-full h-auto object-contain max-w-[400px]" />
           </div>
         </div>
       </div>

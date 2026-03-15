@@ -22,6 +22,9 @@ export function useVal() {
   return ctx;
 }
 
+// Alias for compatibility
+export const useValuation = useVal;
+
 export function ValuationProvider({ children }: { children: ReactNode }) {
   const [weights, setWeights] = useState([...DW]);
   const [firmScores, setFirmScores] = useState([[...FA], [...FB], [...FC]]);
