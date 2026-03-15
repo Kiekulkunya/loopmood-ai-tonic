@@ -1,10 +1,13 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import { useApp } from "@/contexts/AppContext";
-import Toolbar from "@/components/Toolbar";
+import { Download } from "lucide-react";
+import { downloadAsImage } from "@/lib/downloadUtils";
+import { toast } from "sonner";
 
 export default function PMTraffic() {
   const { logs } = useApp();
+  const trafficRef = useRef<HTMLDivElement>(null);
 
   const pv = useMemo(() => {
     const c: Record<string, number> = {};
@@ -13,8 +16,11 @@ export default function PMTraffic() {
   }, [logs]);
 
   return (
-    <div className="p-4 animate-fade-in">
-      <Toolbar title="Traffic Analytics" />
+    <div className="p-4 animate-fade-in" ref={trafficRef}>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-base font-bold text-foreground">Traffic Analytics</h2>
+        <button onClick={async () => { if (trafficRef.current) { await downloadAsImage(trafficRef.current, "traffic-analytics"); toast.success("Image downloaded"); } }} className="p-1.5 rounded border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Download Image"><Download size={14} /></button>
+      </div>
       <div className="grid grid-cols-3 gap-3 mb-3">
         {[
           { l: "Total Actions", v: logs.length },

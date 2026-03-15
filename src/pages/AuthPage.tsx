@@ -67,7 +67,7 @@ export default function AuthPage() {
 
         <div className="mt-8 p-4 bg-primary/5 border border-primary/10 rounded-2xl">
           <p className="text-[11px] text-primary leading-relaxed text-center">
-            Your credentials will be stored in encrypted memory for automatic access during your next session.
+            Your API key is stored in memory only for this session. It is never saved to our servers and will be cleared when you close the browser.
           </p>
         </div>
       </div>

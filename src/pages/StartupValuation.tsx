@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useValuation } from "@/contexts/ValuationContext";
 import { useApp } from "@/contexts/AppContext";
 import { toast } from "sonner";
+import { downloadCSV } from "@/lib/downloadUtils";
 import FeedbackSurvey from "@/components/FeedbackSurvey";
 
 const FIRM_COLORS = ["#3B82F6", "#06B6D4", "#A855F7"];
@@ -100,7 +101,20 @@ export default function ValuationSimulator() {
           <div className="flex gap-1">
             <input ref={fileRef} type="file" hidden accept=".csv,.pdf,.jpg,.png,.xlsx" onChange={(e) => { if (e.target.files?.[0]) toast.success(`Uploaded: ${e.target.files[0].name}`); e.target.value = ""; }} />
             <button onClick={() => fileRef.current?.click()} className="p-2 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><UploadCloud className="w-4 h-4" /></button>
-            <button onClick={() => toast.success("Download started")} className="p-2 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><Download className="w-4 h-4" /></button>
+            <button onClick={() => {
+              const allParams: string[] = [];
+              CATS.forEach((c) => c.items.forEach((it) => it.p.forEach((p) => allParams.push(p.n))));
+              const headers = ["#", "Parameter", "Weight (%)", ...firmNames.flatMap((n) => [`${n} Score`, `${n} Weighted`])];
+              const rows = allParams.map((name, pi) => {
+                const row: (string | number)[] = [pi + 1, name, weights[pi]];
+                firmScores.forEach((scores) => { const sc = scores[pi] || 1; row.push(sc, (sc * (weights[pi] / 100)).toFixed(3)); });
+                return row;
+              });
+              rows.push(["", "TOTAL", weights.reduce((a, b) => a + b, 0).toFixed(1), ...results.flatMap((r) => ["", r.total.toFixed(3)])]);
+              rows.push(["", "Standardized (100 pts)", "", ...results.flatMap((r) => ["", r.std.toFixed(1)])]);
+              downloadCSV("valuation-simulator", headers, rows);
+              toast.success("CSV downloaded");
+            }} className="p-2 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><Download className="w-4 h-4" /></button>
             <button onClick={handleRefresh} className="p-2 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><RotateCcw className="w-4 h-4" /></button>
           </div>
         </div>

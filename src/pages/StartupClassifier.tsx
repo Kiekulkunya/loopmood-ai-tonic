@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { Globe, Upload, Rocket, Download, RotateCcw, Lightbulb } from "lucide-react";
 import Toolbar from "@/components/Toolbar";
+import { downloadCSV } from "@/lib/downloadUtils";
 
 interface AnalysisResult {
   objective: string;
@@ -194,9 +195,18 @@ export default function StartupClassifier() {
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-foreground">2. AI-Generated Analysis</h2>
               {result && (
-                <button className="rounded-full bg-destructive px-3 py-1 text-xs font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors">
+                <button
+                  onClick={() => {
+                    if (result) {
+                      const headers = ["Objective", "Stage", "Probability (%)", "Keywords"];
+                      const rows = result.stages.map((s) => [result.objective, s.name, s.probability, result.keywords.join("; ")]);
+                      downloadCSV("startup-classifier", headers, rows);
+                    }
+                  }}
+                  className="rounded-full bg-destructive px-3 py-1 text-xs font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors"
+                >
                   <Download size={12} className="mr-1 inline" />
-                  Download Excel
+                  Download CSV
                 </button>
               )}
             </div>

@@ -9,10 +9,12 @@ import {
   Shield, Database, Globe, Cpu, MessageSquare, Layout,
   Server, Lock, Eye, Zap, GitBranch, Layers, Code2,
   Monitor, Palette, Brain, Bot, Key, Cloud, ArrowRight,
-  ChevronDown, ChevronRight, ExternalLink, Workflow,
+  ChevronDown, ChevronRight, ExternalLink, Workflow, Download,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { downloadAsImage } from "@/lib/downloadUtils";
 
 // ─── Architecture Layers ─────────────────────────────
 
@@ -387,13 +389,14 @@ export default function PMArchitecture() {
   const [activeLayer, setActiveLayer] = useState<string | null>(null);
   const [showFlows, setShowFlows] = useState(true);
   const [flowFilter, setFlowFilter] = useState<string | null>(null);
+  const archRef = useRef<HTMLDivElement>(null);
 
   const filteredFlows = flowFilter
     ? DATA_FLOWS.filter((f) => f.type === flowFilter)
     : DATA_FLOWS;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={archRef}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -406,6 +409,7 @@ export default function PMArchitecture() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={async () => { if (archRef.current) { await downloadAsImage(archRef.current, "loopai-architecture"); toast.success("Image downloaded"); } }} className="px-3 py-1.5 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors flex items-center gap-1.5 text-xs"><Download className="w-3.5 h-3.5" />Download</button>
           <button
             onClick={() => setShowFlows(!showFlows)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${

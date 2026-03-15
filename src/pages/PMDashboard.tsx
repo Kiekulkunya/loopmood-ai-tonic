@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer,
   LineChart, Line, CartesianGrid, Legend, PieChart, Pie, AreaChart, Area,
@@ -16,7 +16,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useApp } from "@/contexts/AppContext";
 import { toast } from "sonner";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Download } from "lucide-react";
+import { downloadAsImage } from "@/lib/downloadUtils";
 
 const MONTHLY_DATA = [
   { month: "Jul", b2cUsers: 120, b2bClients: 0, reports: 340, mrr: 2400, nps: 38, churn: 8 },
@@ -102,9 +103,16 @@ export default function PMDashboard() {
     { id: "system", label: "System Health", icon: Server },
   ];
 
+  const dashRef = useRef<HTMLDivElement>(null);
+
   return (
-    <div className="space-y-4 p-4">
-      <div><h1 className="text-lg font-bold text-white flex items-center gap-2"><Layers className="w-5 h-5 text-blue-400" />PM Command Center</h1><p className="text-[10px] text-slate-500">Strategic dashboard for B2C→B2B scaling · PRD-aligned · Feedback-driven</p></div>
+    <div className="space-y-4 p-4" ref={dashRef}>
+      <div className="flex items-center justify-between">
+        <div><h1 className="text-lg font-bold text-white flex items-center gap-2"><Layers className="w-5 h-5 text-blue-400" />PM Command Center</h1><p className="text-[10px] text-slate-500">Strategic dashboard for B2C→B2B scaling · PRD-aligned · Feedback-driven</p></div>
+        <div className="flex gap-1">
+          <button onClick={async () => { if (dashRef.current) { await downloadAsImage(dashRef.current, "pm-dashboard"); toast.success("Image downloaded"); } }} className="p-2 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><Download className="w-4 h-4" /></button>
+        </div>
+      </div>
 
       <div className="flex gap-1.5 overflow-x-auto pb-1">
         {sections.map((s) => { const Icon = s.icon; const active = activeSection === s.id; return (

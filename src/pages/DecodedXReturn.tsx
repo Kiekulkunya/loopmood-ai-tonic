@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { downloadCSV } from "@/lib/downloadUtils";
 
 const SCENARIOS = [
   { id: "S7", name: "MKT Leader Disruption", color: "#EC4899" },
@@ -148,7 +149,12 @@ export default function DecodedXReturn() {
           <div className="flex gap-1">
             <input ref={fileRef} type="file" hidden accept=".csv,.pdf,.jpg,.png,.xlsx" onChange={(e) => { if (e.target.files?.[0]) toast.success(`Uploaded: ${e.target.files[0].name}`); e.target.value = ""; }} />
             <button onClick={() => fileRef.current?.click()} className="p-2 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><UploadCloud className="w-4 h-4" /></button>
-            <button onClick={() => toast.success("Download started")} className="p-2 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><Download className="w-4 h-4" /></button>
+            <button onClick={() => {
+              const headers = ["Scenario ID", "Scenario Name", "Probability (%)"];
+              const rows = SCENARIOS.map((s, i) => [s.id, s.name, (probs[i] * 100).toFixed(2)]);
+              downloadCSV("decoded-x-return", headers, rows);
+              toast.success("CSV downloaded");
+            }} className="p-2 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><Download className="w-4 h-4" /></button>
             <button onClick={handleRefresh} className="p-2 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><RotateCcw className="w-4 h-4" /></button>
           </div>
         </div>

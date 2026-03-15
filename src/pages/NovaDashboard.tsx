@@ -13,6 +13,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { downloadAsImage } from "@/lib/downloadUtils";
 
 const FIRM_COLORS = ["#3B82F6", "#06B6D4", "#A855F7"];
 const SEC_COUNTS = [8, 7, 8];
@@ -77,8 +78,10 @@ export default function NovaDashboard() {
     return { fn, strengths: scored.filter((s) => s.score >= 4).sort((a, b) => b.weight - a.weight).slice(0, 3), weaknesses: scored.filter((s) => s.score <= 2).sort((a, b) => b.weight - a.weight).slice(0, 3), avg: +(scored.reduce((a, s) => a + s.score, 0) / scored.length).toFixed(2) };
   }), [firmScores, firmNames, weights]);
 
+  const dashRef = useRef<HTMLDivElement>(null);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={dashRef}>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold text-white flex items-center gap-2"><Sparkles className="w-5 h-5 text-amber-400" />Nova Dashboard</h1>
@@ -87,7 +90,7 @@ export default function NovaDashboard() {
         <div className="flex gap-1">
           <input ref={fileRef} type="file" hidden accept=".csv,.pdf,.png" onChange={(e) => { if (e.target.files?.[0]) toast.success(`Uploaded: ${e.target.files[0].name}`); e.target.value = ""; }} />
           <button onClick={() => fileRef.current?.click()} className="p-2 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><UploadCloud className="w-4 h-4" /></button>
-          <button onClick={() => toast.success("Download started")} className="p-2 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><Download className="w-4 h-4" /></button>
+          <button onClick={async () => { if (dashRef.current) { await downloadAsImage(dashRef.current, "nova-dashboard"); toast.success("Image downloaded"); } }} className="p-2 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><Download className="w-4 h-4" /></button>
           <button onClick={() => toast.info("Refreshed")} className="p-2 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><RotateCcw className="w-4 h-4" /></button>
         </div>
       </div>
