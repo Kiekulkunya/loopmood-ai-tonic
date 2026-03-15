@@ -15,12 +15,13 @@ export default function EngineConfig() {
   const [key, setKey] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const { setProvider, setApiKey, addToast } = useApp();
+  const { setProvider, setApiKey, addToast, setRole } = useApp();
   const role = (location.state as any)?.role || "user";
 
   const handleComplete = () => {
     setProvider(provider);
     setApiKey(key);
+    setRole(role);
     addToast(provider === "mock" ? "Mock Mode activated" : `AI: ${provider} configured`);
     navigate("/app/classifier");
   };

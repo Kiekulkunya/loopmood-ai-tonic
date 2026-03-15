@@ -19,6 +19,7 @@ import PMLog from "@/pages/PMLog";
 import PMTraffic from "@/pages/PMTraffic";
 import PMDashboard from "@/pages/PMDashboard";
 import PMArchitecture from "@/pages/PMArchitecture";
+import PMEmailAutomation from "@/pages/PMEmailAutomation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
