@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/contexts/AppContext";
 import { ValuationProvider } from "@/contexts/ValuationContext";
+import { DisplayProvider } from "@/contexts/DisplayContext";
 import AppLayout from "@/components/AppLayout";
 import LandingPage from "@/pages/LandingPage";
 import RoleSelection from "@/pages/RoleSelection";
