@@ -110,26 +110,22 @@ export default function StartupClassifier() {
     <div className="animate-fade-in p-6">
       <div className="mx-auto max-w-6xl">
         <Toolbar title="Startup Classifier" onRefresh={handleReset} />
-        {/* Two Column Layout */}
         <div className="grid gap-6 lg:grid-cols-[55fr_45fr]">
           {/* Left Column */}
           <div className="space-y-5">
-            {/* Info Banner */}
-            <div className="flex items-start gap-3 rounded-lg border border-accent/30 bg-accent/5 p-4">
-              <Globe size={18} className="mt-0.5 shrink-0 text-accent" />
-              <p className="text-xs text-accent">
+            <div className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 p-4">
+              <Globe size={18} className="mt-0.5 shrink-0 text-primary" />
+              <p className="text-xs text-primary">
                 <span className="font-semibold">Real-time Mode:</span> You can now fetch content from any URL! Paste a link and we'll retrieve it for analysis. All file formats supported (PDF, images, text).
               </p>
             </div>
 
-            {/* Section Title */}
             <h2 className="text-lg font-bold text-foreground">1. Analyze Startup Information</h2>
 
-            {/* URL Input */}
             <div>
               <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-foreground">
                 Website URL
-                <span className="text-[11px] font-normal text-accent">(Real-time fetching enabled)</span>
+                <span className="text-[11px] font-normal text-primary">(Real-time fetching enabled)</span>
               </label>
               <input
                 type="url"
@@ -140,16 +136,15 @@ export default function StartupClassifier() {
               />
             </div>
 
-            {/* File Upload */}
             <div>
               <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-foreground">
                 Upload Document
-                <span className="text-[11px] font-normal text-accent">(PDF, images & text files supported)</span>
+                <span className="text-[11px] font-normal text-primary">(PDF, images & text files supported)</span>
               </label>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground hover:bg-accent/90 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
                 >
                   <Upload size={14} />
                   Choose File
@@ -173,7 +168,6 @@ export default function StartupClassifier() {
               )}
             </div>
 
-            {/* Paste Text */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-foreground">Paste Article Text</label>
               <textarea
@@ -185,11 +179,10 @@ export default function StartupClassifier() {
               />
             </div>
 
-            {/* Analyze Button */}
             <button
               onClick={handleAnalyze}
               disabled={isLoading || (!url && !articleText && !fileName)}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent py-3 text-sm font-semibold text-accent-foreground hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Rocket size={16} />
               {isLoading ? "Analyzing..." : "Match Startup Stage"}
@@ -224,7 +217,6 @@ export default function StartupClassifier() {
 
             {result && !isLoading && (
               <div className="space-y-4">
-                {/* Identified Objective */}
                 <div className="rounded-lg border border-border bg-card p-4">
                   <div className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase mb-1">
                     Identified Objective:
@@ -232,7 +224,6 @@ export default function StartupClassifier() {
                   <div className="text-2xl font-bold text-foreground">{result.objective}</div>
                 </div>
 
-                {/* Stage Probability */}
                 <div>
                   <h3 className="mb-3 text-sm font-semibold text-primary italic">Stage Probability Analysis:</h3>
                   <div className="space-y-3">
@@ -253,7 +244,6 @@ export default function StartupClassifier() {
                   </div>
                 </div>
 
-                {/* Explanation */}
                 <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
                   <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-primary">
                     <Lightbulb size={14} />
@@ -262,14 +252,13 @@ export default function StartupClassifier() {
                   <p className="text-sm leading-relaxed text-foreground/80">{result.explanation}</p>
                 </div>
 
-                {/* Keywords */}
                 <div>
                   <h3 className="mb-2 text-sm font-semibold text-primary italic">Key Insights / Keywords:</h3>
                   <div className="flex flex-wrap gap-2">
                     {result.keywords.map((kw) => (
                       <span
                         key={kw}
-                        className="rounded-full bg-accent/15 px-3 py-1 text-xs font-medium text-accent"
+                        className="rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-primary"
                       >
                         {kw}
                       </span>
@@ -281,7 +270,6 @@ export default function StartupClassifier() {
           </div>
         </div>
 
-        {/* Reset Button */}
         {result && (
           <div className="mt-6 flex justify-end">
             <button
