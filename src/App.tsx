@@ -32,28 +32,30 @@ const App = () => (
       <Sonner />
       <AppProvider>
         <ValuationProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/role" element={<RoleSelection />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/engine" element={<EngineConfig />} />
-              <Route path="/app" element={<AppLayout />}>
-                <Route index element={<Navigate to="/app/classifier" replace />} />
-                <Route path="classifier" element={<StartupClassifier />} />
-                <Route path="decoded-x-return" element={<DecodedXReturn />} />
-                <Route path="risk-pwmoic" element={<RiskPWMOIC />} />
-                <Route path="valuation" element={<StartupValuation />} />
-                <Route path="nova-dashboard" element={<NovaDashboard />} />
-                <Route path="pm/log" element={<PMLog />} />
-                <Route path="pm/traffic" element={<PMTraffic />} />
-              <Route path="pm/dashboard" element={<PMDashboard />} />
-              <Route path="pm/architecture" element={<PMArchitecture />} />
-              <Route path="pm/email" element={<PMEmailAutomation />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <DisplayProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/role" element={<RoleSelection />} />
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/engine" element={<EngineConfig />} />
+                <Route path="/app" element={<AppLayout />}>
+                  <Route index element={<Navigate to="/app/classifier" replace />} />
+                  <Route path="classifier" element={<StartupClassifier />} />
+                  <Route path="decoded-x-return" element={<DecodedXReturn />} />
+                  <Route path="risk-pwmoic" element={<RiskPWMOIC />} />
+                  <Route path="valuation" element={<StartupValuation />} />
+                  <Route path="nova-dashboard" element={<NovaDashboard />} />
+                  <Route path="pm/log" element={<PMLog />} />
+                  <Route path="pm/traffic" element={<PMTraffic />} />
+                  <Route path="pm/dashboard" element={<PMDashboard />} />
+                  <Route path="pm/architecture" element={<PMArchitecture />} />
+                  <Route path="pm/email" element={<PMEmailAutomation />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </DisplayProvider>
         </ValuationProvider>
       </AppProvider>
     </TooltipProvider>
