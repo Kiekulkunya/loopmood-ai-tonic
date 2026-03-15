@@ -315,7 +315,7 @@ function NodeCard({ node, isActive, onClick }: {
       style={{
         borderColor: isActive ? node.color + "55" : "#1E293B",
         backgroundColor: isActive ? node.color + "08" : "#111827",
-        ringColor: isActive ? node.color : undefined,
+        boxShadow: isActive ? `0 0 0 1px ${node.color}` : undefined,
       }}
     >
       <div className="flex items-start gap-3">
