@@ -136,6 +136,7 @@ export default function PMDashboard() {
 
       {activeSection === "feedback" && (
         <div className="space-y-4">
+          <div className="flex justify-end mb-2"><button onClick={() => toast.info("Feedback data refreshed")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#1E293B] bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><RotateCcw className="w-3 h-3" />Refresh</button></div>
           <div className="grid grid-cols-4 gap-3">
             <KPI icon={MessageSquare} label="Total Responses" value={feedbackStats.total} color="#3B82F6" />
             <KPI icon={Star} label="Avg Satisfaction" value={`${feedbackStats.avgSat} / 5`} color="#F59E0B" target="≥ 4.0" />

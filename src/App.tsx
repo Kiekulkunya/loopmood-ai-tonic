@@ -18,6 +18,7 @@ import NovaDashboard from "@/pages/NovaDashboard";
 import PMLog from "@/pages/PMLog";
 import PMTraffic from "@/pages/PMTraffic";
 import PMDashboard from "@/pages/PMDashboard";
+import PMArchitecture from "@/pages/PMArchitecture";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
