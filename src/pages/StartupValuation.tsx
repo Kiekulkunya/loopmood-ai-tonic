@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useValuation } from "@/contexts/ValuationContext";
 import { useApp } from "@/contexts/AppContext";
 import { toast } from "sonner";
+import { downloadCSV } from "@/lib/downloadUtils";
 import FeedbackSurvey from "@/components/FeedbackSurvey";
 
 const FIRM_COLORS = ["#3B82F6", "#06B6D4", "#A855F7"];
