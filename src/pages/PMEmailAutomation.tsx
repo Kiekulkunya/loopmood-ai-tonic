@@ -109,27 +109,50 @@ export default function PMEmailAutomation() {
     setIsSending(true);
     logAct("email_report_manual", "pm/email");
 
-    // Simulate sending (no edge function required for demo)
-    await new Promise((r) => setTimeout(r, 2000));
+    try {
+      const supabaseUrl = `https://ssffuvezgexthcppxfhn.supabase.co/functions/v1/send-pm-report`;
+      const response = await fetch(supabaseUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipient: config.recipient,
+          sections: config.sections,
+        }),
+      });
 
-    const success = Math.random() > 0.15;
-    const newLog: EmailLog = {
-      id: `e-${Date.now()}`,
-      recipient: config.recipient,
-      status: success ? "success" : "failed",
-      sentAt: new Date().toISOString(),
-      emailId: success ? `re_${Math.random().toString(36).slice(2, 8)}` : undefined,
-      error: success ? undefined : "Simulated: Edge function not deployed yet",
-      reportSections: config.sections,
-      trigger: "manual",
-    };
+      const result = await response.json();
 
-    setLogs((prev) => [newLog, ...prev]);
-    if (success) {
-      toast.success(`Report sent to ${config.recipient}`);
-    } else {
-      toast.error("Failed to send report (demo mode)");
+      const newLog: EmailLog = {
+        id: `e-${Date.now()}`,
+        recipient: config.recipient,
+        status: result.success ? "success" : "failed",
+        sentAt: new Date().toISOString(),
+        emailId: result.emailId || undefined,
+        error: result.success ? undefined : (result.error || "Unknown error"),
+        reportSections: config.sections,
+        trigger: "manual",
+      };
+
+      setLogs((prev) => [newLog, ...prev]);
+      if (result.success) {
+        toast.success(`Report sent to ${config.recipient}`);
+      } else {
+        toast.error(`Failed: ${result.error || "Unknown error"}`);
+      }
+    } catch (err: any) {
+      const newLog: EmailLog = {
+        id: `e-${Date.now()}`,
+        recipient: config.recipient,
+        status: "failed",
+        sentAt: new Date().toISOString(),
+        error: err.message || "Network error",
+        reportSections: config.sections,
+        trigger: "manual",
+      };
+      setLogs((prev) => [newLog, ...prev]);
+      toast.error(`Failed: ${err.message || "Network error"}`);
     }
+
     setIsSending(false);
   };
 
