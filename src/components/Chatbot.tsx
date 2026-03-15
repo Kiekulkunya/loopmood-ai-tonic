@@ -19,12 +19,14 @@ const respond = (text: string) => {
 
 export function ChatbotFAB() {
   const [open, setOpen] = useState(false);
+  const { sidebarVisible } = useDisplay();
+  const bottomClass = sidebarVisible ? "bottom-4" : "bottom-16";
 
   return (
     <>
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-4 right-4 w-12 h-12 rounded-full bg-primary text-primary-foreground border-none cursor-pointer flex items-center justify-center text-lg shadow-lg shadow-primary/30 z-50 hover:scale-105 transition-transform"
+        className={`fixed ${bottomClass} right-4 w-12 h-12 rounded-full bg-primary text-primary-foreground border-none cursor-pointer flex items-center justify-center text-lg shadow-lg shadow-primary/30 z-50 hover:scale-105 transition-transform`}
       >
         💬
       </button>
