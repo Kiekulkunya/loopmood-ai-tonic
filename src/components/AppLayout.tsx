@@ -37,7 +37,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/app/classifier": "Startup Classifier",
   "/app/decoded-x-return": "Decoded X Return",
   "/app/risk-pwmoic": "Unleashing Risk & PWMOIC",
-  "/app/valuation": "Startup Valuation",
+  "/app/valuation": "Valuation Simulator",
   "/app/nova-dashboard": "Nova Dashboard",
   "/app/pm/log": "Activity Log",
   "/app/pm/traffic": "Traffic Analytics",
