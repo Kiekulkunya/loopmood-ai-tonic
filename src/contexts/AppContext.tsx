@@ -1,10 +1,16 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import type { SurveyResult } from "@/components/FeedbackSurvey";
 
 interface LogEntry {
   id: string;
   action: string;
   page: string;
   time: string;
+}
+
+interface FeedbackEntry extends SurveyResult {
+  id: string;
+  timestamp: string;
 }
 
 interface AppContextType {
@@ -18,6 +24,8 @@ interface AppContextType {
   setChatOpen: (open: boolean) => void;
   addToast: (msg: string) => void;
   toasts: { id: number; msg: string }[];
+  feedbackEntries: FeedbackEntry[];
+  addFeedback: (result: SurveyResult) => void;
 }
 
 const AppCtx = createContext<AppContextType | null>(null);
@@ -34,6 +42,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
   const [toasts, setToasts] = useState<{ id: number; msg: string }[]>([]);
+  const [feedbackEntries, setFeedbackEntries] = useState<FeedbackEntry[]>([]);
 
   const addToast = useCallback((msg: string) => {
     const id = Date.now();
@@ -47,8 +56,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const addFeedback = useCallback((result: SurveyResult) => {
+    setFeedbackEntries((p) => [
+      { ...result, id: crypto.randomUUID(), timestamp: new Date().toISOString() },
+      ...p,
+    ]);
+  }, []);
+
   return (
-    <AppCtx.Provider value={{ provider, setProvider, apiKey, setApiKey, logs, logAct, chatOpen, setChatOpen, addToast, toasts }}>
+    <AppCtx.Provider value={{ provider, setProvider, apiKey, setApiKey, logs, logAct, chatOpen, setChatOpen, addToast, toasts, feedbackEntries, addFeedback }}>
       {children}
     </AppCtx.Provider>
   );

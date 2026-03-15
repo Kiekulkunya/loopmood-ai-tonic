@@ -18,6 +18,7 @@ import NovaDashboard from "@/pages/NovaDashboard";
 import PMLog from "@/pages/PMLog";
 import PMTraffic from "@/pages/PMTraffic";
 import PMDashboard from "@/pages/PMDashboard";
+import PMArchitecture from "@/pages/PMArchitecture";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,7 +45,8 @@ const App = () => (
                 <Route path="nova-dashboard" element={<NovaDashboard />} />
                 <Route path="pm/log" element={<PMLog />} />
                 <Route path="pm/traffic" element={<PMTraffic />} />
-                <Route path="pm/dashboard" element={<PMDashboard />} />
+              <Route path="pm/dashboard" element={<PMDashboard />} />
+              <Route path="pm/architecture" element={<PMArchitecture />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

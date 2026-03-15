@@ -22,7 +22,7 @@ const USER_NAV = [
   { label: "Startup Classifier", icon: FlaskConical, path: "/app/classifier" },
   { label: "Decoded X Return", icon: TrendingUp, path: "/app/decoded-x-return" },
   { label: "Unleashing Risk & PWMOIC", icon: Zap, path: "/app/risk-pwmoic" },
-  { label: "Startup Valuation", icon: Target, path: "/app/valuation" },
+  { label: "Valuation Simulator", icon: Target, path: "/app/valuation" },
   { label: "Nova Dashboard", icon: BarChart3, path: "/app/nova-dashboard" },
 ];
 
@@ -30,17 +30,19 @@ const PM_NAV = [
   { label: "Activity Log", icon: ClipboardList, path: "/app/pm/log" },
   { label: "Traffic Analytics", icon: Activity, path: "/app/pm/traffic" },
   { label: "PM Dashboard", icon: LayoutDashboard, path: "/app/pm/dashboard" },
+  { label: "LoopAI Structure", icon: Settings, path: "/app/pm/architecture" },
 ];
 
 const PAGE_TITLES: Record<string, string> = {
   "/app/classifier": "Startup Classifier",
   "/app/decoded-x-return": "Decoded X Return",
   "/app/risk-pwmoic": "Unleashing Risk & PWMOIC",
-  "/app/valuation": "Startup Valuation",
+  "/app/valuation": "Valuation Simulator",
   "/app/nova-dashboard": "Nova Dashboard",
   "/app/pm/log": "Activity Log",
   "/app/pm/traffic": "Traffic Analytics",
   "/app/pm/dashboard": "PM Dashboard",
+  "/app/pm/architecture": "LoopAI Structure",
 };
 
 export default function AppLayout() {

@@ -15,6 +15,8 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useApp } from "@/contexts/AppContext";
+import { toast } from "sonner";
+import { RotateCcw } from "lucide-react";
 
 const MONTHLY_DATA = [
   { month: "Jul", b2cUsers: 120, b2bClients: 0, reports: 340, mrr: 2400, nps: 38, churn: 8 },
@@ -29,7 +31,7 @@ const MONTHLY_DATA = [
 const FEATURE_USAGE = [{ name: "Classifier", uses: 4200, pct: 35 },{ name: "Decoded X", uses: 2400, pct: 20 },{ name: "Risk & PWMOIC", uses: 2160, pct: 18 },{ name: "Valuation Sim", uses: 1800, pct: 15 },{ name: "Nova Dashboard", uses: 1440, pct: 12 }];
 const FUNNEL_DATA = [{ stage: "Landing Visit", count: 25000, pct: 100 },{ stage: "Sign Up", count: 5000, pct: 20 },{ stage: "Form Started", count: 3500, pct: 14 },{ stage: "Report Generated", count: 2100, pct: 8.4 },{ stage: "Paid Subscriber", count: 950, pct: 3.8 },{ stage: "Repeat User", count: 380, pct: 1.5 }];
 const ROADMAP_PHASES = [{ phase: "Phase 1", title: "Core + PWMOIC Engine", weeks: "1–2", status: "done", items: ["User registration","Data entry forms","PWMOIC scoring logic","Expert validation"] },{ phase: "Phase 2", title: "Reports + B2C Payment", weeks: "3–4", status: "done", items: ["Reporting UI","PDF export","Dashboard","Stripe integration"] },{ phase: "Phase 3", title: "B2B Multi-Startup + API", weeks: "5–6", status: "current", items: ["Multi-user teams","Bulk upload","REST API endpoints","Pilot B2B clients"] },{ phase: "Phase 4", title: "QA + Launch", weeks: "7–8", status: "upcoming", items: ["Performance tuning","Bug fixes","Documentation","Marketing assets"] }];
-const B2B_PIPELINE = [{ name: "TechStars", type: "Accelerator", stage: "Negotiation", value: 24000, prob: 80 },{ name: "Sequoia Scout", type: "VC", stage: "Demo", value: 48000, prob: 40 },{ name: "SCB 10X", type: "Bank", stage: "Pilot", value: 36000, prob: 60 },{ name: "500 Global", type: "Accelerator", stage: "Proposal", value: 18000, prob: 30 },{ name: "Krungsri Finnovate", type: "Bank", stage: "Contact", value: 30000, prob: 15 }];
+const B2B_PIPELINE = [{ name: "TechStars", type: "Accelerator", stage: "Negotiation", value: 24000, prob: 80 },{ name: "Sequoia Scout", type: "VC", stage: "Demo", value: 48000, prob: 40 },{ name: "BNP Paribas (Opera Tech)", type: "Bank", stage: "Pilot", value: 36000, prob: 60 },{ name: "500 Global", type: "Accelerator", stage: "Proposal", value: 18000, prob: 30 },{ name: "Barclay (Eagle Labs)", type: "Bank/VC", stage: "Contact", value: 18000, prob: 15 }];
 const COMPETITOR_LANDSCAPE = [{ name: "LoopAI", ai: 5, ux: 4, price: 5, b2b: 3, api: 3 },{ name: "PitchBook", ai: 3, ux: 3, price: 1, b2b: 5, api: 5 },{ name: "Equidam", ai: 2, ux: 4, price: 4, b2b: 3, api: 2 },{ name: "BizEquity", ai: 2, ux: 3, price: 3, b2b: 4, api: 3 },{ name: "CB Insights", ai: 4, ux: 3, price: 1, b2b: 5, api: 4 }];
 const SYSTEM_HEALTH = [{ name: "Auth Service", status: "healthy", uptime: 99.98, latency: 45 },{ name: "PWMOIC Engine", status: "healthy", uptime: 99.95, latency: 280 },{ name: "Report Generator", status: "healthy", uptime: 99.92, latency: 1200 },{ name: "Database", status: "healthy", uptime: 99.99, latency: 12 },{ name: "AI Provider (Gemini)", status: "healthy", uptime: 99.80, latency: 890 },{ name: "PDF Export", status: "warning", uptime: 99.50, latency: 2400 }];
 const FEEDBACK_RESPONSES = [
@@ -135,6 +137,7 @@ export default function PMDashboard() {
 
       {activeSection === "feedback" && (
         <div className="space-y-4">
+          <div className="flex justify-end mb-2"><button onClick={() => toast.info("Feedback data refreshed")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#1E293B] bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><RotateCcw className="w-3 h-3" />Refresh</button></div>
           <div className="grid grid-cols-4 gap-3">
             <KPI icon={MessageSquare} label="Total Responses" value={feedbackStats.total} color="#3B82F6" />
             <KPI icon={Star} label="Avg Satisfaction" value={`${feedbackStats.avgSat} / 5`} color="#F59E0B" target="≥ 4.0" />
