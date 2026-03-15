@@ -1,12 +1,20 @@
+import { useRef } from "react";
 import { useApp } from "@/contexts/AppContext";
+import { Download } from "lucide-react";
 import Toolbar from "@/components/Toolbar";
+import { downloadAsImage } from "@/lib/downloadUtils";
+import { toast } from "sonner";
 
 export default function PMLog() {
   const { logs } = useApp();
+  const logRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="p-4 animate-fade-in">
-      <Toolbar title="Activity Log" />
+    <div className="p-4 animate-fade-in" ref={logRef}>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-base font-bold text-foreground">Activity Log</h2>
+        <button onClick={async () => { if (logRef.current) { await downloadAsImage(logRef.current, "activity-log"); toast.success("Image downloaded"); } }} className="p-1.5 rounded border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Download Image"><Download size={14} /></button>
+      </div>
       <div className="rounded-lg border border-border bg-card p-3">
         <table className="w-full text-xs">
           <thead>

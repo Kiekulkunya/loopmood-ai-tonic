@@ -157,17 +157,22 @@ export default function PMEmailAutomation() {
     setIsSending(false);
   };
 
+  const emailRef = useRef<HTMLDivElement>(null);
+
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-6" ref={emailRef}>
       {/* Header */}
-      <div>
-        <h1 className="text-lg font-bold text-foreground flex items-center gap-2">
-          <Mail className="w-5 h-5 text-primary" />
-          Email Report Automation
-        </h1>
-        <p className="text-[10px] text-muted-foreground">
-          Automated nightly PM dashboard reports to {config.recipient}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-bold text-foreground flex items-center gap-2">
+            <Mail className="w-5 h-5 text-primary" />
+            Email Report Automation
+          </h1>
+          <p className="text-[10px] text-muted-foreground">
+            Automated nightly PM dashboard reports to {config.recipient}
+          </p>
+        </div>
+        <button onClick={async () => { if (emailRef.current) { await downloadAsImage(emailRef.current, "email-report"); toast.success("Image downloaded"); } }} className="p-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"><Download className="w-4 h-4" /></button>
       </div>
 
       {/* KPI Row */}
