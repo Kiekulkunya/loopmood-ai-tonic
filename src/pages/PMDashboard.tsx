@@ -16,7 +16,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useApp } from "@/contexts/AppContext";
 import { toast } from "sonner";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Download } from "lucide-react";
+import { downloadAsImage } from "@/lib/downloadUtils";
 
 const MONTHLY_DATA = [
   { month: "Jul", b2cUsers: 120, b2bClients: 0, reports: 340, mrr: 2400, nps: 38, churn: 8 },
