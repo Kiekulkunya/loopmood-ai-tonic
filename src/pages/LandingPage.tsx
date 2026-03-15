@@ -1,12 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, RefreshCw } from "lucide-react";
 import loopaiLogo from "@/assets/loopai-logo.png";
+import DisplayModeSelector from "@/components/DisplayModeSelector";
 
 export default function LandingPage() {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      <DisplayModeSelector />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(217_91%_60%/0.1),transparent_50%)]" />
 
       {/* Logo top-right */}
