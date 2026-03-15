@@ -13,6 +13,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { downloadAsImage } from "@/lib/downloadUtils";
 
 const FIRM_COLORS = ["#3B82F6", "#06B6D4", "#A855F7"];
 const SEC_COUNTS = [8, 7, 8];
