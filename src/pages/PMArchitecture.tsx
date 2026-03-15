@@ -409,6 +409,7 @@ export default function PMArchitecture() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={async () => { if (archRef.current) { await downloadAsImage(archRef.current, "loopai-architecture"); toast.success("Image downloaded"); } }} className="px-3 py-1.5 rounded-lg bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors flex items-center gap-1.5 text-xs"><Download className="w-3.5 h-3.5" />Download</button>
           <button
             onClick={() => setShowFlows(!showFlows)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
