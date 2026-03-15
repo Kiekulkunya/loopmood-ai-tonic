@@ -8,6 +8,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      <DisplayModeSelector />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(217_91%_60%/0.1),transparent_50%)]" />
 
       {/* Logo top-right */}
