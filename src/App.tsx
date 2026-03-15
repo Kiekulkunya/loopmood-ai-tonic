@@ -19,6 +19,7 @@ import PMLog from "@/pages/PMLog";
 import PMTraffic from "@/pages/PMTraffic";
 import PMDashboard from "@/pages/PMDashboard";
 import PMArchitecture from "@/pages/PMArchitecture";
+import PMEmailAutomation from "@/pages/PMEmailAutomation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
                 <Route path="pm/traffic" element={<PMTraffic />} />
               <Route path="pm/dashboard" element={<PMDashboard />} />
               <Route path="pm/architecture" element={<PMArchitecture />} />
+              <Route path="pm/email" element={<PMEmailAutomation />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -26,6 +26,8 @@ interface AppContextType {
   toasts: { id: number; msg: string }[];
   feedbackEntries: FeedbackEntry[];
   addFeedback: (result: SurveyResult) => void;
+  role: string;
+  setRole: (r: string) => void;
 }
 
 const AppCtx = createContext<AppContextType | null>(null);
@@ -43,6 +45,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [toasts, setToasts] = useState<{ id: number; msg: string }[]>([]);
   const [feedbackEntries, setFeedbackEntries] = useState<FeedbackEntry[]>([]);
+  const [role, setRole] = useState("user");
 
   const addToast = useCallback((msg: string) => {
     const id = Date.now();
@@ -64,7 +67,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AppCtx.Provider value={{ provider, setProvider, apiKey, setApiKey, logs, logAct, chatOpen, setChatOpen, addToast, toasts, feedbackEntries, addFeedback }}>
+    <AppCtx.Provider value={{ provider, setProvider, apiKey, setApiKey, logs, logAct, chatOpen, setChatOpen, addToast, toasts, feedbackEntries, addFeedback, role, setRole }}>
       {children}
     </AppCtx.Provider>
   );

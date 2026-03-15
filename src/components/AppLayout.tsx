@@ -13,6 +13,9 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Workflow,
+  Mail,
+  Lock,
 } from "lucide-react";
 import { ChatbotFAB } from "@/components/Chatbot";
 import ToastContainer from "@/components/ToastContainer";
@@ -30,7 +33,8 @@ const PM_NAV = [
   { label: "Activity Log", icon: ClipboardList, path: "/app/pm/log" },
   { label: "Traffic Analytics", icon: Activity, path: "/app/pm/traffic" },
   { label: "PM Dashboard", icon: LayoutDashboard, path: "/app/pm/dashboard" },
-  { label: "LoopAI Structure", icon: Settings, path: "/app/pm/architecture" },
+  { label: "LoopAI Structure", icon: Workflow, path: "/app/pm/architecture" },
+  { label: "Email Reports", icon: Mail, path: "/app/pm/email" },
 ];
 
 const PAGE_TITLES: Record<string, string> = {
@@ -43,6 +47,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/app/pm/traffic": "Traffic Analytics",
   "/app/pm/dashboard": "PM Dashboard",
   "/app/pm/architecture": "LoopAI Structure",
+  "/app/pm/email": "Email Report Automation",
 };
 
 export default function AppLayout() {
@@ -50,14 +55,24 @@ export default function AppLayout() {
   const [session, setSession] = useState<"user" | "pm">("user");
   const location = useLocation();
   const navigate = useNavigate();
-  const { provider, logAct } = useApp();
+  const { provider, logAct, role, addToast } = useApp();
 
+  const isPM = role === "pm";
   const navItems = session === "user" ? USER_NAV : PM_NAV;
   const pageTitle = PAGE_TITLES[location.pathname] || "LoopAI";
 
   useEffect(() => {
     logAct("page_view", location.pathname);
   }, [location.pathname, logAct]);
+
+  const handlePMClick = () => {
+    if (!isPM) {
+      addToast("Access denied: Product Manager privileges required");
+      return;
+    }
+    setSession("pm");
+    navigate("/app/pm/log");
+  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -99,13 +114,17 @@ export default function AppLayout() {
               User
             </button>
             <button
-              onClick={() => { setSession("pm"); navigate("/app/pm/log"); }}
-              className={`flex-1 rounded px-3 py-1.5 text-xs font-medium transition-colors ${
+              onClick={handlePMClick}
+              className={`flex-1 rounded px-3 py-1.5 text-xs font-medium transition-colors relative ${
                 session === "pm"
                   ? "bg-primary text-primary-foreground"
+                  : !isPM
+                  ? "text-muted-foreground/40 cursor-not-allowed"
                   : "text-muted-foreground hover:bg-secondary"
               }`}
+              disabled={!isPM}
             >
+              {!isPM && <Lock size={10} className="inline mr-1 mb-0.5" />}
               Product Manager
             </button>
           </div>
@@ -163,6 +182,11 @@ export default function AppLayout() {
             }`}>
               {provider === "mock" ? "Mock Mode" : `AI: ${provider}`}
             </span>
+            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+              isPM ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
+            }`}>
+              {isPM ? "PM Access" : "User Access"}
+            </span>
           </div>
         </header>
 
@@ -173,7 +197,7 @@ export default function AppLayout() {
 
         {/* Footer */}
         <footer className="border-t border-border py-2 text-center text-[10px] text-muted-foreground">
-          LoopAI for TECH 41 Stanford · Educational Purpose Only · © 2025
+          LoopAI for TECH 41 Stanford · Educational Purpose Only · @ 2026
         </footer>
       </div>
 
