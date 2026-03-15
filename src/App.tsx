@@ -48,6 +48,7 @@ const App = () => (
                 <Route path="pm/traffic" element={<PMTraffic />} />
               <Route path="pm/dashboard" element={<PMDashboard />} />
               <Route path="pm/architecture" element={<PMArchitecture />} />
+              <Route path="pm/email" element={<PMEmailAutomation />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
