@@ -15,6 +15,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useApp } from "@/contexts/AppContext";
+import { toast } from "sonner";
 import { RotateCcw } from "lucide-react";
 
 const MONTHLY_DATA = [
