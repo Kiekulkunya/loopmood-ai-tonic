@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Database } from "lucide-react";
+import { ArrowRight, RefreshCw } from "lucide-react";
 import loopaiLogo from "@/assets/loopai-logo.png";
 
 export default function LandingPage() {
