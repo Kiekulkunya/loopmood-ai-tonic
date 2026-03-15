@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { Globe, Upload, Rocket, Download, RotateCcw, Lightbulb } from "lucide-react";
 import Toolbar from "@/components/Toolbar";
+import { downloadCSV } from "@/lib/downloadUtils";
 
 interface AnalysisResult {
   objective: string;
