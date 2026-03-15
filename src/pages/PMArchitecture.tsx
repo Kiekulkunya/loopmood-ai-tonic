@@ -9,10 +9,12 @@ import {
   Shield, Database, Globe, Cpu, MessageSquare, Layout,
   Server, Lock, Eye, Zap, GitBranch, Layers, Code2,
   Monitor, Palette, Brain, Bot, Key, Cloud, ArrowRight,
-  ChevronDown, ChevronRight, ExternalLink, Workflow,
+  ChevronDown, ChevronRight, ExternalLink, Workflow, Download,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { downloadAsImage } from "@/lib/downloadUtils";
 
 // ─── Architecture Layers ─────────────────────────────
 
