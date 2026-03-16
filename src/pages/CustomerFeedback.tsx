@@ -16,21 +16,7 @@ const FEATURES = [
   { id: "valuation", name: "Valuation Simulator", icon: Target, color: "#A855F7", desc: "Multi-firm comparative scoring across 23 weighted parameters" },
 ];
 
-interface Review {
-  id: string;
-  featureId: string;
-  userName: string;
-  userEmail: string;
-  rating: number;
-  title: string;
-  comment: string;
-  aiEnhanced: boolean;
-  helpful: number;
-  notHelpful: number;
-  createdAt: string;
-  sentiment: "positive" | "neutral" | "negative";
-  userRole: string;
-}
+// Review type is now CustomerReview from AppContext
 
 const SEED_REVIEWS: Review[] = [
   { id: "r1", featureId: "classifier", userName: "Sarah Chen", userEmail: "sarah@startup.io", rating: 5, title: "Game changer for pitch prep", comment: "The AI classifier accurately identified our startup stage from a TechCrunch article about our funding round. The stage probability breakdown gave me confidence going into investor meetings. The keyword extraction is particularly useful for understanding how the market perceives us.", aiEnhanced: false, helpful: 12, notHelpful: 1, createdAt: "2025-03-10T14:30:00Z", sentiment: "positive", userRole: "Founder" },
