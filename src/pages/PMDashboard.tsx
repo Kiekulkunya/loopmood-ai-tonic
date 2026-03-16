@@ -268,7 +268,7 @@ export default function PMDashboard() {
                           {cfg.icon} {cfg.label}
                         </Badge>
                         <span className="text-[8px] text-slate-600">{rev.feature}</span>
-                        <span className="text-[8px] text-slate-700 ml-auto">{rev.date}</span>
+                        <span className="text-[8px] text-slate-700 ml-auto">{new Date(rev.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
                       </div>
                     </div>
                   </div>
