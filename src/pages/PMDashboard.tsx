@@ -466,10 +466,6 @@ export default function PMDashboard() {
       )}
 
       {activeSection === "metrics" && (() => {
-        const [aiReportGenerated, setAiReportGenerated] = React.useState(false);
-        const [aiReportConfirmed, setAiReportConfirmed] = React.useState(false);
-        const [generatingReport, setGeneratingReport] = React.useState(false);
-        const metricsRef = React.useRef<HTMLDivElement>(null);
 
         const allMetrics = [...SUCCESS_METRICS.userCentric, ...SUCCESS_METRICS.business, ...SUCCESS_METRICS.technical];
         const onTrack = allMetrics.filter((m: any) => m.inverse ? m.current <= m.target : m.current >= m.target).length;
