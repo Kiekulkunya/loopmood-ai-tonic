@@ -64,6 +64,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<{ id: number; msg: string }[]>([]);
   const [feedbackEntries, setFeedbackEntries] = useState<FeedbackEntry[]>([]);
   const [role, setRole] = useState("user");
+  const [customerReviews, setCustomerReviews] = useState<CustomerReview[]>([]);
 
   const addToast = useCallback((msg: string) => {
     const id = Date.now();
@@ -84,8 +85,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ]);
   }, []);
 
+  const addCustomerReview = useCallback((review: CustomerReview) => {
+    setCustomerReviews((p) => [review, ...p]);
+  }, []);
+
   return (
-    <AppCtx.Provider value={{ provider, setProvider, apiKey, setApiKey, logs, logAct, chatOpen, setChatOpen, addToast, toasts, feedbackEntries, addFeedback, role, setRole }}>
+    <AppCtx.Provider value={{ provider, setProvider, apiKey, setApiKey, logs, logAct, chatOpen, setChatOpen, addToast, toasts, feedbackEntries, addFeedback, role, setRole, customerReviews, addCustomerReview }}>
       {children}
     </AppCtx.Provider>
   );
