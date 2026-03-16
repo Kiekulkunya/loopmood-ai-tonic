@@ -263,7 +263,7 @@ export default function PMArchitecture() {
         <div>
           <h1 className="text-lg font-bold text-white flex items-center gap-2">
             <Workflow className="w-5 h-5 text-blue-400" />
-            LoopAI Core Architecture
+            LoopAI Architecture
           </h1>
           <p className="text-[10px] text-slate-500">{totalComponents} components · {DATA_FLOWS.length} data flows · {newComponents} new · {liveComponents} live</p>
         </div>
