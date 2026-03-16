@@ -102,9 +102,8 @@ function ReviewCard({ review }: { review: CustomerReview }) {
                 {new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
               </span>
             </div>
-              </span>
-            </div>
           </div>
+        </div>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: sentimentColor }} />
