@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer,
   LineChart, Line, CartesianGrid, Legend, PieChart, Pie, AreaChart, Area,
-  RadarChart, PolarGrid, PolarAngleAxis, Radar, ComposedChart,
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ComposedChart,
 } from "recharts";
 import {
   Users, TrendingUp, DollarSign, Target, Shield, Zap,
