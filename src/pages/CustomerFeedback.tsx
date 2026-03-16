@@ -67,7 +67,7 @@ function StarRating({ value, onChange, size = 20, readonly = false }: {
   );
 }
 
-function ReviewCard({ review }: { review: Review }) {
+function ReviewCard({ review }: { review: CustomerReview }) {
   const [expanded, setExpanded] = useState(false);
   const [helpfulCount, setHelpfulCount] = useState(review.helpful);
   const [voted, setVoted] = useState<"up" | "down" | null>(null);
