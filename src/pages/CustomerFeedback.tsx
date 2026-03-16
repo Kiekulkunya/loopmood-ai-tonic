@@ -234,7 +234,7 @@ export default function CustomerFeedback() {
           <CardContent className="p-4 text-center">
             <div className="text-3xl font-black text-amber-400">{overallAvg}</div>
             <StarRating value={Math.round(overallAvg)} readonly size={14} />
-            <div className="text-[9px] text-muted-foreground mt-1">{reviews.length} reviews</div>
+            <div className="text-[9px] text-muted-foreground mt-1">{allReviews.length} reviews</div>
           </CardContent>
         </Card>
         {featureStats.map((f) => {
