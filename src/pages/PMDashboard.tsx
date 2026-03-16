@@ -99,6 +99,7 @@ export default function PMDashboard() {
     { id: "feedback", label: "Feedback & Insights", icon: MessageSquare },
     { id: "growth", label: "Growth & Revenue", icon: TrendingUp },
     { id: "funnel", label: "User Funnel", icon: Target },
+    { id: "metrics", label: "Success Metrics", icon: ShieldCheck },
     { id: "b2b", label: "B2B Pipeline", icon: Building2 },
     { id: "roadmap", label: "Roadmap", icon: Rocket },
     { id: "competitive", label: "Competitive", icon: Crown },
