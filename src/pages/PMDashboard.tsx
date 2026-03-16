@@ -461,17 +461,74 @@ export default function PMDashboard() {
         })}</div></ChartCard>
       )}
 
-      {activeSection === "metrics" && (
-        <div className="space-y-4">
+      {activeSection === "metrics" && (() => {
+        const [aiReportGenerated, setAiReportGenerated] = React.useState(false);
+        const [aiReportConfirmed, setAiReportConfirmed] = React.useState(false);
+        const [generatingReport, setGeneratingReport] = React.useState(false);
+        const metricsRef = React.useRef<HTMLDivElement>(null);
+
+        const allMetrics = [...SUCCESS_METRICS.userCentric, ...SUCCESS_METRICS.business, ...SUCCESS_METRICS.technical];
+        const onTrack = allMetrics.filter((m: any) => m.inverse ? m.current <= m.target : m.current >= m.target).length;
+        const needsAttention = allMetrics.filter((m: any) => { const pct = m.inverse ? (m.target / m.current) * 100 : (m.current / m.target) * 100; return pct >= 70 && pct < 100; }).length;
+        const criticalGap = allMetrics.filter((m: any) => { const pct = m.inverse ? (m.target / m.current) * 100 : (m.current / m.target) * 100; return pct < 70; }).length;
+
+        const ucAvg = Math.round(SUCCESS_METRICS.userCentric.reduce((a, m: any) => a + Math.min((m.inverse ? (m.target / m.current) : (m.current / m.target)) * 100, 100), 0) / SUCCESS_METRICS.userCentric.length);
+        const bizAvg = Math.round(SUCCESS_METRICS.business.reduce((a, m: any) => a + Math.min((m.inverse ? (m.target / m.current) : (m.current / m.target)) * 100, 100), 0) / SUCCESS_METRICS.business.length);
+        const techAvg = Math.round(SUCCESS_METRICS.technical.reduce((a, m: any) => a + Math.min((m.inverse ? (m.target / m.current) : (m.current / m.target)) * 100, 100), 0) / SUCCESS_METRICS.technical.length);
+
+        const overviewRadarData = [
+          { pillar: "User-Centric", current: ucAvg, target: 100 },
+          { pillar: "Business", current: bizAvg, target: 100 },
+          { pillar: "Technical", current: techAvg, target: 100 },
+        ];
+
+        const makeSubRadarData = (metrics: any[]) => metrics.map((m: any) => ({
+          name: m.name.replace(/\s*\(.*\)/, "").substring(0, 18),
+          current: Math.min((m.inverse ? (m.target / m.current) : (m.current / m.target)) * 100, 120),
+          target: 100,
+        }));
+
+        const ucRadar = makeSubRadarData(SUCCESS_METRICS.userCentric);
+        const bizRadar = makeSubRadarData(SUCCESS_METRICS.business);
+        const techRadar = makeSubRadarData(SUCCESS_METRICS.technical);
+
+        const trustAvg = Math.round(TRUST_PILLARS.reduce((a, b) => a + b.score, 0) / TRUST_PILLARS.length);
+        const trustTargetAvg = Math.round(TRUST_PILLARS.reduce((a, b) => a + b.target, 0) / TRUST_PILLARS.length);
+
+        const handleGenerateReport = () => {
+          setGeneratingReport(true);
+          setTimeout(() => {
+            setGeneratingReport(false);
+            setAiReportGenerated(true);
+            toast.success("AI Comprehensive Report generated successfully");
+          }, 2500);
+        };
+
+        const handleDownloadPDF = async () => {
+          if (metricsRef.current) {
+            await downloadAsImage(metricsRef.current, "PM-Success-Metrics-Report");
+            toast.success("Report downloaded as image");
+          }
+        };
+
+        return (
+        <div className="space-y-4" ref={metricsRef}>
           <Card className="bg-[#111827] border-[#1E293B] overflow-hidden">
             <CardContent className="p-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-600/15 border border-blue-600/25 flex items-center justify-center">
-                  <Target className="w-5 h-5 text-blue-400" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-600/15 border border-blue-600/25 flex items-center justify-center">
+                    <Target className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-white">PRD Success Metrics & TRUST Framework</h2>
+                    <p className="text-[9px] text-slate-500 mt-0.5">Gap analysis against ChatPRD targets · Ethical AI governance via TRUST pillars</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-sm font-bold text-white">PRD Success Metrics & TRUST Framework</h2>
-                  <p className="text-[9px] text-slate-500 mt-0.5">Gap analysis against ChatPRD targets · Ethical AI governance via TRUST pillars</p>
+                <div className="flex gap-2">
+                  <button onClick={handleDownloadPDF} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-[#1E293B] bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors">
+                    <Download className="w-3.5 h-3.5" />Download PDF
+                  </button>
                 </div>
               </div>
             </CardContent>
@@ -479,9 +536,9 @@ export default function PMDashboard() {
 
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: "Metrics On Track", value: [...SUCCESS_METRICS.userCentric, ...SUCCESS_METRICS.business, ...SUCCESS_METRICS.technical].filter((m: any) => m.inverse ? m.current <= m.target : m.current >= m.target).length, total: 9, color: "#10B981" },
-              { label: "Needs Attention", value: [...SUCCESS_METRICS.userCentric, ...SUCCESS_METRICS.business, ...SUCCESS_METRICS.technical].filter((m: any) => { const pct = m.inverse ? (m.target / m.current) * 100 : (m.current / m.target) * 100; return pct >= 70 && pct < 100; }).length, total: 9, color: "#F59E0B" },
-              { label: "Critical Gap", value: [...SUCCESS_METRICS.userCentric, ...SUCCESS_METRICS.business, ...SUCCESS_METRICS.technical].filter((m: any) => { const pct = m.inverse ? (m.target / m.current) * 100 : (m.current / m.target) * 100; return pct < 70; }).length, total: 9, color: "#EF4444" },
+              { label: "Metrics On Track", value: onTrack, total: 9, color: "#10B981" },
+              { label: "Needs Attention", value: needsAttention, total: 9, color: "#F59E0B" },
+              { label: "Critical Gap", value: criticalGap, total: 9, color: "#EF4444" },
             ].map((s, i) => (
               <Card key={i} className="bg-[#111827] border-[#1E293B]">
                 <CardContent className="p-4 text-center">
@@ -492,56 +549,81 @@ export default function PMDashboard() {
             ))}
           </div>
 
-          {[
-            { title: "👤 User-Centric Metrics", data: SUCCESS_METRICS.userCentric, color: "#06B6D4" },
-            { title: "💰 Business Metrics", data: SUCCESS_METRICS.business, color: "#10B981" },
-            { title: "⚙️ Technical Metrics", data: SUCCESS_METRICS.technical, color: "#8B5CF6" },
-          ].map((cat) => (
-            <ChartCard key={cat.title} title={cat.title} subtitle="Current vs PRD target — gap analysis">
-              <div className="space-y-4">
-                {cat.data.map((m: any) => {
-                  const pct = m.inverse
-                    ? Math.min((m.target / m.current) * 100, 100)
-                    : Math.min((m.current / m.target) * 100, 100);
-                  const isOnTrack = pct >= 100;
-                  const isClose = pct >= 80;
-                  const statusColor = isOnTrack ? "#10B981" : isClose ? "#F59E0B" : "#EF4444";
-                  const gap = m.inverse ? m.current - m.target : m.target - m.current;
-                  return (
-                    <div key={m.id} className="flex items-start gap-4">
-                      <div className="w-[200px] shrink-0">
-                        <div className="text-xs font-bold text-white">{m.name}</div>
-                        <div className="text-[8px] text-slate-500 mt-0.5">{m.desc}</div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-black text-white">{m.current}{m.unit}</span>
-                            <ArrowRight className="w-3 h-3 text-slate-600" />
-                            <span className="text-[10px] text-slate-400">Target: {m.target}{m.unit}</span>
-                          </div>
-                          <Badge className="text-[7px] px-1.5" style={{ backgroundColor: statusColor + "15", color: statusColor }}>
-                            {isOnTrack ? "✓ On Track" : isClose ? `Gap: ${Math.abs(gap).toFixed(1)}${m.unit}` : `⚠ Gap: ${Math.abs(gap).toFixed(1)}${m.unit}`}
-                          </Badge>
-                        </div>
-                        <div className="relative w-full h-3 bg-[#1E293B] rounded-full overflow-hidden">
-                          <div className="absolute h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: statusColor }} />
-                          <div className="absolute top-0 bottom-0 w-0.5 bg-white/30" style={{ left: "100%" }} />
-                        </div>
-                        <div className="flex items-end gap-0.5 mt-1.5 h-4">
-                          {m.trend.map((v: number, i: number) => {
-                            const max = Math.max(...m.trend);
-                            const h = max > 0 ? (v / max) * 100 : 0;
-                            return <div key={i} className="flex-1 rounded-sm transition-all" style={{ height: `${h}%`, backgroundColor: i === m.trend.length - 1 ? statusColor : statusColor + "33" }} />;
-                          })}
-                        </div>
+          {/* Three-Pillar Overview Triangle Radar */}
+          <ChartCard title="📐 Three-Pillar PRD Achievement Radar" subtitle="User-Centric · Business · Technical — % of PRD target achieved">
+            <div className="grid grid-cols-2 gap-4">
+              <ResponsiveContainer width="100%" height={300}>
+                <RadarChart data={overviewRadarData}>
+                  <PolarGrid stroke="#1E293B" />
+                  <PolarAngleAxis dataKey="pillar" tick={{ fill: "#94A3B8", fontSize: 11, fontWeight: 700 }} />
+                  <PolarRadiusAxis domain={[0, 120]} tick={{ fill: "#475569", fontSize: 8 }} />
+                  <Radar name="Current %" dataKey="current" stroke="#06B6D4" fill="#06B6D4" fillOpacity={0.2} strokeWidth={2.5} dot={{ r: 5, fill: "#06B6D4", stroke: "#0B0F19", strokeWidth: 2 }} />
+                  <Radar name="Target (100%)" dataKey="target" stroke="#EF4444" fill="transparent" strokeDasharray="6 4" strokeWidth={1.5} dot={{ r: 3, fill: "#EF4444" }} />
+                  <Legend wrapperStyle={{ fontSize: 10 }} />
+                  <Tooltip {...TT} formatter={(v: number) => [`${v}%`, ""]} />
+                </RadarChart>
+              </ResponsiveContainer>
+              <div className="flex flex-col justify-center gap-3">
+                {[
+                  { label: "User-Centric", pct: ucAvg, color: "#06B6D4", icon: "👤" },
+                  { label: "Business", pct: bizAvg, color: "#10B981", icon: "💰" },
+                  { label: "Technical", pct: techAvg, color: "#8B5CF6", icon: "⚙️" },
+                ].map((p) => (
+                  <div key={p.label} className="flex items-center gap-3 p-3 rounded-xl bg-[#0B0F19] border border-[#1E293B]">
+                    <span className="text-lg">{p.icon}</span>
+                    <div className="flex-1">
+                      <div className="text-xs font-bold text-white">{p.label}</div>
+                      <div className="w-full h-2 bg-[#1E293B] rounded-full mt-1 overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(p.pct, 100)}%`, backgroundColor: p.color }} />
                       </div>
                     </div>
-                  );
-                })}
+                    <div className="text-sm font-black" style={{ color: p.color }}>{p.pct}%</div>
+                  </div>
+                ))}
               </div>
-            </ChartCard>
-          ))}
+            </div>
+          </ChartCard>
+
+          {/* Sub-category Triangle Radars */}
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { title: "👤 User-Centric Gap Radar", data: ucRadar, color: "#06B6D4", metrics: SUCCESS_METRICS.userCentric },
+              { title: "💰 Business Gap Radar", data: bizRadar, color: "#10B981", metrics: SUCCESS_METRICS.business },
+              { title: "⚙️ Technical Gap Radar", data: techRadar, color: "#8B5CF6", metrics: SUCCESS_METRICS.technical },
+            ].map((cat) => (
+              <ChartCard key={cat.title} title={cat.title} subtitle="Current vs PRD target (100%)">
+                <ResponsiveContainer width="100%" height={240}>
+                  <RadarChart data={cat.data}>
+                    <PolarGrid stroke="#1E293B" />
+                    <PolarAngleAxis dataKey="name" tick={{ fill: "#94A3B8", fontSize: 8 }} />
+                    <PolarRadiusAxis domain={[0, 120]} tick={{ fill: "#475569", fontSize: 7 }} />
+                    <Radar name="Current" dataKey="current" stroke={cat.color} fill={cat.color} fillOpacity={0.2} strokeWidth={2} dot={{ r: 4, fill: cat.color, stroke: "#0B0F19", strokeWidth: 2 }} />
+                    <Radar name="Target" dataKey="target" stroke="#EF4444" fill="transparent" strokeDasharray="5 5" strokeWidth={1.5} dot={{ r: 2, fill: "#EF4444" }} />
+                    <Tooltip {...TT} formatter={(v: number) => [`${v.toFixed(0)}%`, ""]} />
+                  </RadarChart>
+                </ResponsiveContainer>
+                <div className="space-y-2 mt-3">
+                  {cat.metrics.map((m: any) => {
+                    const pct = m.inverse ? Math.min((m.target / m.current) * 100, 100) : Math.min((m.current / m.target) * 100, 100);
+                    const isOnTrack = pct >= 100;
+                    const gap = m.inverse ? m.current - m.target : m.target - m.current;
+                    const statusColor = isOnTrack ? "#10B981" : pct >= 80 ? "#F59E0B" : "#EF4444";
+                    return (
+                      <div key={m.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-[#0B0F19] border border-[#1E293B]/50">
+                        <div className="text-[9px] font-semibold text-white truncate flex-1">{m.name}</div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[10px] font-black text-white">{m.current}{m.unit}</span>
+                          <Badge className="text-[6px] px-1" style={{ backgroundColor: statusColor + "15", color: statusColor }}>
+                            {isOnTrack ? "✓" : `−${Math.abs(gap).toFixed(1)}${m.unit}`}
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ChartCard>
+            ))}
+          </div>
 
           <ChartCard title="📋 PRD Tracking Plan" subtitle="Event-based funnel tracking — current vs target">
             <div className="grid grid-cols-6 gap-2">
@@ -563,6 +645,7 @@ export default function PMDashboard() {
             </div>
           </ChartCard>
 
+          {/* TRUST Framework */}
           <Card className="bg-[#111827] border-[#1E293B] overflow-hidden">
             <div className="px-5 py-3 border-b border-[#1E293B] bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-emerald-500/5">
               <div className="flex items-center gap-2">
@@ -592,20 +675,16 @@ export default function PMDashboard() {
                 <div>
                   <h4 className="text-xs font-bold text-slate-300 mb-3">Overall TRUST Score</h4>
                   <div className="text-center py-4">
-                    <div className="text-5xl font-black text-blue-400">
-                      {Math.round(TRUST_PILLARS.reduce((a, b) => a + b.score, 0) / TRUST_PILLARS.length)}
-                    </div>
+                    <div className="text-5xl font-black text-blue-400">{trustAvg}</div>
                     <div className="text-xs text-slate-400 mt-1">out of 100</div>
-                    <div className="text-[9px] text-slate-500 mt-0.5">
-                      Target: {Math.round(TRUST_PILLARS.reduce((a, b) => a + b.target, 0) / TRUST_PILLARS.length)}
-                    </div>
+                    <div className="text-[9px] text-slate-500 mt-0.5">Target: {trustTargetAvg}</div>
                   </div>
                   <div className="flex justify-center gap-2 mt-4">
                     {TRUST_PILLARS.map((p) => {
                       const gap = p.target - p.score;
                       return (
                         <div key={p.id} className="text-center">
-                          <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-1.5 transition-all" style={{ backgroundColor: p.color + "15", border: `1px solid ${p.color}33` }}>
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-1.5" style={{ backgroundColor: p.color + "15", border: `1px solid ${p.color}33` }}>
                             <span className="text-lg font-black" style={{ color: p.color }}>{p.abbr}</span>
                           </div>
                           <div className="text-xs font-bold" style={{ color: p.color }}>{p.score}</div>
@@ -621,7 +700,6 @@ export default function PMDashboard() {
                 {TRUST_PILLARS.map((pillar) => {
                   const Icon = pillar.icon;
                   const gap = pillar.target - pillar.score;
-                  const pct = (pillar.score / pillar.target) * 100;
                   return (
                     <div key={pillar.id} className="rounded-xl border p-4" style={{ borderColor: pillar.color + "22", backgroundColor: pillar.color + "04" }}>
                       <div className="flex items-center justify-between mb-3">
@@ -646,9 +724,7 @@ export default function PMDashboard() {
                           const mColor = m.score >= 85 ? "#10B981" : m.score >= 70 ? "#F59E0B" : "#EF4444";
                           return (
                             <div key={m.name} className="flex items-center gap-2 py-1.5 px-2.5 rounded-lg bg-[#0B0F19] border border-[#1E293B]/50">
-                              <div className="w-7 h-7 rounded flex items-center justify-center text-[10px] font-black shrink-0" style={{ backgroundColor: mColor + "15", color: mColor }}>
-                                {m.score}
-                              </div>
+                              <div className="w-7 h-7 rounded flex items-center justify-center text-[10px] font-black shrink-0" style={{ backgroundColor: mColor + "15", color: mColor }}>{m.score}</div>
                               <div className="flex-1 min-w-0">
                                 <div className="text-[9px] font-semibold text-white truncate">{m.name}</div>
                                 <div className="text-[7px] text-slate-500 truncate">{m.detail}</div>
@@ -661,9 +737,7 @@ export default function PMDashboard() {
                         <div className="text-[8px] font-bold mb-1.5" style={{ color: pillar.color }}>🔧 Improvement Priorities:</div>
                         <div className="flex flex-wrap gap-1.5">
                           {pillar.improvements.map((imp, i) => (
-                            <span key={i} className="text-[8px] px-2 py-0.5 rounded-full border" style={{ borderColor: pillar.color + "22", color: pillar.color + "CC", backgroundColor: pillar.color + "08" }}>
-                              {imp}
-                            </span>
+                            <span key={i} className="text-[8px] px-2 py-0.5 rounded-full border" style={{ borderColor: pillar.color + "22", color: pillar.color + "CC", backgroundColor: pillar.color + "08" }}>{imp}</span>
                           ))}
                         </div>
                       </div>
@@ -678,18 +752,186 @@ export default function PMDashboard() {
                   <div>
                     <div className="text-xs font-bold text-white mb-1">AI Governance Summary</div>
                     <p className="text-[9px] text-slate-400 leading-relaxed">
-                      Overall TRUST score is <strong className="text-blue-400">{Math.round(TRUST_PILLARS.reduce((a, b) => a + b.score, 0) / TRUST_PILLARS.length)}/100</strong> against a target of {Math.round(TRUST_PILLARS.reduce((a, b) => a + b.target, 0) / TRUST_PILLARS.length)}.
+                      Overall TRUST score is <strong className="text-blue-400">{trustAvg}/100</strong> against a target of {trustTargetAvg}.
                       <strong className="text-amber-400"> Reinforced</strong> (security) and <strong className="text-red-400">Transparent</strong> (explainability) are the two pillars with the largest gaps.
                       Priority actions: (1) Implement full audit trails for B2B compliance, (2) Add AI explainability with per-dimension factor attribution, (3) Complete WCAG 2.1 AA accessibility audit.
-                      These improvements directly support Phase 3 B2B enterprise requirements and responsible AI governance commitments.
                     </p>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* KEY TAKEAWAYS */}
+          <Card className="bg-[#111827] border-[#1E293B] overflow-hidden">
+            <div className="px-5 py-3 border-b border-[#1E293B] bg-gradient-to-r from-amber-500/5 via-blue-500/5 to-emerald-500/5">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-amber-400" />
+                <div>
+                  <h3 className="text-sm font-bold text-white">📌 Key Takeaways for PM</h3>
+                  <p className="text-[9px] text-slate-500">Consolidated insights from PRD Success Metrics & TRUST Framework</p>
+                </div>
+              </div>
+            </div>
+            <CardContent className="p-5">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="text-xs font-bold text-emerald-400 mb-2">✅ Strengths</div>
+                  {[
+                    { text: `${onTrack} of 9 PRD metrics are on track — strong execution on core KPIs`, icon: "🎯" },
+                    { text: `MRR Growth at 37% (target 12%) — revenue engine exceeding expectations 3x`, icon: "📈" },
+                    { text: `Report Gen Time at 18s (target 30s) — technical performance ahead of schedule`, icon: "⚡" },
+                    { text: `Platform Uptime 99.93% — exceeds 99.9% SLA target`, icon: "🛡️" },
+                    { text: `TRUST "Tried-and-True" pillar at 82/90 — methodology validation strong`, icon: "✅" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-start gap-2.5 py-2 px-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                      <span className="text-sm shrink-0">{item.icon}</span>
+                      <p className="text-[9px] text-slate-300 leading-relaxed">{item.text}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-3">
+                  <div className="text-xs font-bold text-red-400 mb-2">⚠️ Critical Gaps & Actions</div>
+                  {[
+                    { text: `NPS at 42 vs target 45 (Gap: 3) — Focus on detractor recovery and feature polish`, icon: "📊", priority: "High" },
+                    { text: `Return Usage Rate 35% vs 40% — Improve retention via engagement loops and notifications`, icon: "🔄", priority: "High" },
+                    { text: `LTV:CAC 2.4x vs 3x — Reduce CAC via organic growth; increase LTV via upsell`, icon: "💰", priority: "Medium" },
+                    { text: `AI Scoring Accuracy 86% vs 90% — Expand training data and add feedback loops`, icon: "🤖", priority: "Medium" },
+                    { text: `TRUST "Transparent" pillar at 73/85 — AI explainability and model cards needed for B2B`, icon: "👁️", priority: "High" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-start gap-2.5 py-2 px-3 rounded-lg bg-red-500/5 border border-red-500/10">
+                      <span className="text-sm shrink-0">{item.icon}</span>
+                      <div className="flex-1">
+                        <p className="text-[9px] text-slate-300 leading-relaxed">{item.text}</p>
+                        <Badge className="text-[6px] mt-1" style={{ backgroundColor: item.priority === "High" ? "#EF444415" : "#F59E0B15", color: item.priority === "High" ? "#EF4444" : "#F59E0B" }}>{item.priority} Priority</Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-4 p-3 rounded-xl bg-blue-500/5 border border-blue-500/15">
+                <div className="flex items-start gap-2">
+                  <Brain className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
+                  <div>
+                    <div className="text-[10px] font-bold text-blue-400 mb-1">Strategic Recommendation</div>
+                    <p className="text-[9px] text-slate-400 leading-relaxed">
+                      The platform demonstrates strong <strong className="text-emerald-400">technical execution</strong> and <strong className="text-emerald-400">revenue momentum</strong>, but faces gaps in <strong className="text-amber-400">user retention</strong> (NPS & return rate) and <strong className="text-red-400">AI governance</strong> (transparency & explainability). 
+                      For Phase 3 B2B readiness, prioritize: (1) Enterprise audit trails & RBAC, (2) AI factor attribution for scoring transparency, (3) Retention engagement loops. 
+                      Closing these gaps unblocks ~$84K B2B pipeline and improves TRUST score from {trustAvg} → {trustTargetAvg}.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* AI Report Generation */}
+          <Card className="bg-[#111827] border-[#1E293B] overflow-hidden">
+            <div className="px-5 py-3 border-b border-[#1E293B] bg-gradient-to-r from-purple-500/10 via-blue-500/5 to-cyan-500/10">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-purple-400" />
+                <div>
+                  <h3 className="text-sm font-bold text-white">🧠 AI-Enhanced Comprehensive Report</h3>
+                  <p className="text-[9px] text-slate-500">Generate a decision-ready report consolidating all metrics, TRUST analysis, and recommendations</p>
+                </div>
+              </div>
+            </div>
+            <CardContent className="p-5">
+              {!aiReportGenerated ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-4">
+                    <Brain className="w-8 h-8 text-purple-400" />
+                  </div>
+                  <h4 className="text-sm font-bold text-white mb-2">Generate Comprehensive PM Report</h4>
+                  <p className="text-[9px] text-slate-500 max-w-md mx-auto mb-6">
+                    AI will analyze all PRD success metrics ({onTrack} on-track, {needsAttention} attention, {criticalGap} critical), 
+                    TRUST framework scores ({trustAvg}/100), customer feedback, and B2B pipeline to produce a comprehensive decision report.
+                  </p>
+                  <button
+                    onClick={handleGenerateReport}
+                    disabled={generatingReport}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/20"
+                  >
+                    {generatingReport ? (
+                      <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generating Report...</>
+                    ) : (
+                      <><Sparkles className="w-4 h-4" />Enhance Report with AI</>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs font-bold text-emerald-400">AI Report Generated Successfully</span>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-[#0B0F19] border border-[#1E293B] space-y-3">
+                    <div className="text-xs font-bold text-white">📊 Executive Summary</div>
+                    <p className="text-[9px] text-slate-400 leading-relaxed">
+                      LoopAI's PRD execution shows <strong className="text-emerald-400">{onTrack}/9 metrics on-track</strong> with exceptional MRR growth (37% vs 12% target) and technical performance (18s p95 vs 30s target). 
+                      The TRUST governance score stands at <strong className="text-blue-400">{trustAvg}/100</strong> (target: {trustTargetAvg}), with "Reinforced" and "Transparent" pillars requiring priority attention for B2B enterprise readiness.
+                    </p>
+                    
+                    <div className="text-xs font-bold text-white mt-3">🎯 Decision Matrix</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { action: "Enterprise RBAC & Audit", impact: "High", timeline: "Sprint 5-6", status: "Recommended" },
+                        { action: "AI Explainability Engine", impact: "High", timeline: "Sprint 6-7", status: "Recommended" },
+                        { action: "Retention Loop System", impact: "Medium", timeline: "Sprint 5", status: "In Review" },
+                      ].map((d, i) => (
+                        <div key={i} className="p-2.5 rounded-lg bg-[#111827] border border-[#1E293B]">
+                          <div className="text-[9px] font-bold text-white">{d.action}</div>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <Badge className="text-[6px] bg-blue-500/10 text-blue-400">{d.impact}</Badge>
+                            <span className="text-[7px] text-slate-500">{d.timeline}</span>
+                          </div>
+                          <div className="text-[7px] text-emerald-400 mt-1">{d.status}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="text-xs font-bold text-white mt-3">📈 Projected Impact</div>
+                    <p className="text-[9px] text-slate-400 leading-relaxed">
+                      Implementing all recommended actions within the next 2 sprints is projected to: increase NPS from 42 → 48, improve Return Usage Rate from 35% → 42%, 
+                      raise TRUST score from {trustAvg} → {trustTargetAvg}, and unblock $84K in B2B pipeline revenue. LTV:CAC ratio expected to reach 3.2x by Q3.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    {!aiReportConfirmed ? (
+                      <button
+                        onClick={() => { setAiReportConfirmed(true); toast.success("Comprehensive Report confirmed and locked"); }}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-500 hover:to-teal-500 transition-all shadow-lg shadow-emerald-500/20"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />Confirm Comprehensive Report
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <span className="text-xs font-bold text-emerald-400">Report Confirmed</span>
+                      </div>
+                    )}
+                    <button
+                      onClick={handleDownloadPDF}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold border border-[#1E293B] bg-[#1E293B] hover:bg-[#334155] text-slate-300 hover:text-white transition-colors"
+                    >
+                      <Download className="w-4 h-4" />Download Report
+                    </button>
+                    <button
+                      onClick={() => { setAiReportGenerated(false); setAiReportConfirmed(false); }}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-300 transition-colors"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />Regenerate
+                    </button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-      )}
+        );
+      })()}
       {activeSection === "b2b" && (
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
