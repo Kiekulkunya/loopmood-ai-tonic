@@ -145,20 +145,23 @@ export default function PMEmailAutomation() {
 
   const [isScheduling, setIsScheduling] = useState(false);
 
-  const buildCronExpression = (h24: number, minute: number): string => {
+  const buildCronExpression = (localH24: number, localMinute: number): string => {
+    // Convert local time to UTC for pg_cron (which runs in UTC)
+    const now = new Date();
+    const localDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), localH24, localMinute);
+    const utcHour = localDate.getUTCHours();
+    const utcMinute = localDate.getUTCMinutes();
+
     if (repeatMode === "none" || repeatMode === "daily") {
-      // Run daily at the specified time
-      return `${minute} ${h24} * * *`;
+      return `${utcMinute} ${utcHour} * * *`;
     } else if (repeatMode === "weekly") {
-      // Run weekly on the selected day of week
       const dow = selectedDate.getDay();
-      return `${minute} ${h24} * * ${dow}`;
+      return `${utcMinute} ${utcHour} * * ${dow}`;
     } else if (repeatMode === "monthly") {
-      // Run monthly on the selected day of month
       const dom = selectedDate.getDate();
-      return `${minute} ${h24} ${dom} * *`;
+      return `${utcMinute} ${utcHour} ${dom} * *`;
     }
-    return `${minute} ${h24} * * *`;
+    return `${utcMinute} ${utcHour} * * *`;
   };
 
   const confirmSchedule = async () => {
