@@ -138,9 +138,9 @@ function ReviewCard({ review }: { review: CustomerReview }) {
 }
 
 export default function CustomerFeedback() {
-  const { logAct } = useApp();
+  const { logAct, customerReviews, addCustomerReview } = useApp();
 
-  const [reviews, setReviews] = useState<Review[]>(SEED_REVIEWS);
+  const allReviews = useMemo(() => [...customerReviews, ...SEED_REVIEWS], [customerReviews]);
   const [activeFeature, setActiveFeature] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"recent" | "rating" | "helpful">("recent");
 
@@ -153,22 +153,22 @@ export default function CustomerFeedback() {
   const [isEnhancing, setIsEnhancing] = useState(false);
 
   const filteredReviews = useMemo(() => {
-    let r = activeFeature === "all" ? [...reviews] : reviews.filter((rev) => rev.featureId === activeFeature);
+    let r = activeFeature === "all" ? [...allReviews] : allReviews.filter((rev) => rev.featureId === activeFeature);
     if (sortBy === "recent") r.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     else if (sortBy === "rating") r.sort((a, b) => b.rating - a.rating);
     else r.sort((a, b) => b.helpful - a.helpful);
     return r;
-  }, [reviews, activeFeature, sortBy]);
+  }, [allReviews, activeFeature, sortBy]);
 
   const featureStats = useMemo(() => {
     return FEATURES.map((f) => {
-      const fReviews = reviews.filter((r) => r.featureId === f.id);
+      const fReviews = allReviews.filter((r) => r.featureId === f.id);
       const avg = fReviews.length > 0 ? fReviews.reduce((a, b) => a + b.rating, 0) / fReviews.length : 0;
       return { ...f, count: fReviews.length, avg: +avg.toFixed(1) };
     });
-  }, [reviews]);
+  }, [allReviews]);
 
-  const overallAvg = reviews.length > 0 ? +(reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1) : 0;
+  const overallAvg = allReviews.length > 0 ? +(allReviews.reduce((a, b) => a + b.rating, 0) / allReviews.length).toFixed(1) : 0;
 
   const handleAIEnhance = () => {
     if (!formComment.trim()) { toast.error("Write a short comment first, then enhance"); return; }
@@ -187,8 +187,8 @@ export default function CustomerFeedback() {
     if (!formTitle.trim()) { toast.error("Please add a review title"); return; }
     if (!formComment.trim()) { toast.error("Please write a comment"); return; }
 
-    const sentiment: Review["sentiment"] = formRating >= 4 ? "positive" : formRating >= 3 ? "neutral" : "negative";
-    const newReview: Review = {
+    const sentiment: CustomerReview["sentiment"] = formRating >= 4 ? "positive" : formRating >= 3 ? "neutral" : "negative";
+    const newReview: CustomerReview = {
       id: `r-${Date.now()}`,
       featureId: formFeature,
       userName: "Anonymous User",
