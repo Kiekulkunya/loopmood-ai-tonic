@@ -143,13 +143,60 @@ export default function PMEmailAutomation() {
     setScheduleConfirmed(false);
   };
 
-  const confirmSchedule = () => {
+  const [isScheduling, setIsScheduling] = useState(false);
+
+  const buildCronExpression = (h24: number, minute: number): string => {
+    if (repeatMode === "none" || repeatMode === "daily") {
+      // Run daily at the specified time
+      return `${minute} ${h24} * * *`;
+    } else if (repeatMode === "weekly") {
+      // Run weekly on the selected day of week
+      const dow = selectedDate.getDay();
+      return `${minute} ${h24} * * ${dow}`;
+    } else if (repeatMode === "monthly") {
+      // Run monthly on the selected day of month
+      const dom = selectedDate.getDate();
+      return `${minute} ${h24} ${dom} * *`;
+    }
+    return `${minute} ${h24} * * *`;
+  };
+
+  const confirmSchedule = async () => {
     const h24 = schedulePeriod === "AM" ? (scheduleHour === 12 ? 0 : scheduleHour) : (scheduleHour === 12 ? 12 : scheduleHour + 12);
     const timeStr = `${String(h24).padStart(2, "0")}:${String(scheduleMinute).padStart(2, "0")}`;
-    setConfig((p) => ({ ...p, time: timeStr }));
-    setScheduleConfirmed(true);
-    const repeatLabel = repeatMode === "none" ? "once" : repeatMode;
-    toast.success(`Schedule confirmed: ${scheduleHour}:${String(scheduleMinute).padStart(2, "0")} ${schedulePeriod}, repeats ${repeatLabel}`);
+    const cronExpr = buildCronExpression(h24, scheduleMinute);
+
+    setIsScheduling(true);
+
+    try {
+      const supabaseUrl = `https://ssffuvezgexthcppxfhn.supabase.co/functions/v1/manage-email-schedule`;
+      const response = await fetch(supabaseUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "set",
+          cronExpression: cronExpr,
+          recipient: config.recipient,
+          sections: config.sections,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setConfig((p) => ({ ...p, time: timeStr }));
+        setScheduleConfirmed(true);
+        const repeatLabel = repeatMode === "none" ? "once" : repeatMode;
+        toast.success(`✅ Schedule active! Emails will send ${repeatLabel} at ${scheduleHour}:${String(scheduleMinute).padStart(2, "0")} ${schedulePeriod}`);
+        logAct("email_schedule_confirmed", "pm/email");
+      } else {
+        toast.error(`Failed to set schedule: ${result.error || "Unknown error"}`);
+      }
+    } catch (err: any) {
+      toast.error(`Failed to set schedule: ${err.message || "Network error"}`);
+    }
+
+    setIsScheduling(false);
   };
 
   const totalSent = logs.filter((l) => l.status === "success").length;
