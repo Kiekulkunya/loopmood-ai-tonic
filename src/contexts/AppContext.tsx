@@ -13,6 +13,22 @@ interface FeedbackEntry extends SurveyResult {
   timestamp: string;
 }
 
+export interface CustomerReview {
+  id: string;
+  featureId: string;
+  userName: string;
+  userEmail: string;
+  rating: number;
+  title: string;
+  comment: string;
+  aiEnhanced: boolean;
+  helpful: number;
+  notHelpful: number;
+  createdAt: string;
+  sentiment: "positive" | "neutral" | "negative";
+  userRole: string;
+}
+
 interface AppContextType {
   provider: string;
   setProvider: (p: string) => void;
@@ -28,6 +44,8 @@ interface AppContextType {
   addFeedback: (result: SurveyResult) => void;
   role: string;
   setRole: (r: string) => void;
+  customerReviews: CustomerReview[];
+  addCustomerReview: (review: CustomerReview) => void;
 }
 
 const AppCtx = createContext<AppContextType | null>(null);
