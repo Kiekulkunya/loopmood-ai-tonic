@@ -214,7 +214,7 @@ export default function RiskPWMOIC() {
 
   const handleRefresh = () => {
     handleMode("synthetic"); setIndustry("ClimateTech");
-    setTamApproach("Top-Down"); setTdMkt(600); setTdSeg(60); setTdGeo(80);
+    setTamApproach("Top-Down"); setTdSeg(60); setTdGeo(80);
     toast.info("Reset to defaults");
   };
 
