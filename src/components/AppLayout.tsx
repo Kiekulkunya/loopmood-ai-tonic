@@ -63,6 +63,7 @@ const PAGE_ID_TO_PATH: Record<string, string> = {
   risk: "/app/risk-pwmoic",
   valuation: "/app/valuation",
   nova: "/app/nova-dashboard",
+  feedback: "/app/feedback",
   pmlog: "/app/pm/log",
   pmtraffic: "/app/pm/traffic",
   pmdash: "/app/pm/dashboard",
