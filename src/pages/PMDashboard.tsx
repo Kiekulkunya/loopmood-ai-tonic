@@ -11,6 +11,7 @@ import {
   Layers, Rocket, Crown, BarChart3,
   MessageSquare, Star, ThumbsUp, ThumbsDown, Lightbulb,
   Sparkles, Heart, TrendingDown, Filter,
+  Brain, ShieldAlert,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
