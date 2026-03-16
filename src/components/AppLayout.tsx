@@ -48,6 +48,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/app/risk-pwmoic": "Unleashing Risk & PWMOIC",
   "/app/valuation": "Valuation Simulator",
   "/app/nova-dashboard": "Nova Dashboard",
+  "/app/feedback": "Customer Feedback",
   "/app/pm/log": "Activity Log",
   "/app/pm/traffic": "Traffic Analytics",
   "/app/pm/dashboard": "PM Dashboard",
