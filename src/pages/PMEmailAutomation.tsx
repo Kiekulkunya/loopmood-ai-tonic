@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
-  Mail, Clock, CheckCircle2, XCircle, Send, RotateCcw,
+  Mail, Clock, CheckCircle2, XCircle, Send,
   Calendar, Settings, Play, Pause, AlertTriangle,
   FileText, Users, TrendingUp, Target, Building2, Rocket, Crown,
-  Sparkles, Shield, Download,
+  Sparkles, Shield, Download, ChevronLeft, ChevronRight, Repeat, CalendarDays,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +31,8 @@ interface ScheduleConfig {
   sections: string[];
 }
 
+type RepeatMode = "none" | "daily" | "weekly" | "monthly";
+
 const REPORT_SECTIONS = [
   { id: "overview", label: "Overview", icon: FileText, color: "#3B82F6", desc: "B2C users, B2B clients, reports, ARR" },
   { id: "feedback", label: "Feedback & Insights", icon: Users, color: "#F59E0B", desc: "Satisfaction, NPS, feature rankings, suggestions" },
@@ -51,6 +53,17 @@ const INITIAL_LOGS: EmailLog[] = [
   { id: "e7", recipient: "kullalin88@gmail.com", status: "success", sentAt: "2025-03-09T00:00:09Z", emailId: "re_pqr678", reportSections: ["overview","feedback","growth","funnel","b2b","roadmap","competitive"], trigger: "scheduled" },
 ];
 
+const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+function getDaysInMonth(year: number, month: number) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+function getFirstDayOfMonth(year: number, month: number) {
+  return new Date(year, month, 1).getDay();
+}
+
 export default function PMEmailAutomation() {
   const { logAct } = useApp();
 
@@ -64,21 +77,82 @@ export default function PMEmailAutomation() {
 
   const [logs, setLogs] = useState<EmailLog[]>(INITIAL_LOGS);
   const [isSending, setIsSending] = useState(false);
+
+  // Calendar state
+  const today = new Date();
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [selectedDate, setSelectedDate] = useState<Date>(today);
   const [scheduleHour, setScheduleHour] = useState(12);
   const [scheduleMinute, setScheduleMinute] = useState(0);
   const [schedulePeriod, setSchedulePeriod] = useState<"AM" | "PM">("AM");
-  const [scheduleConfirmed, setScheduleConfirmed] = useState(true);
+  const [repeatMode, setRepeatMode] = useState<RepeatMode>("daily");
+  const [startDate, setStartDate] = useState<Date>(today);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [hasEndDate, setHasEndDate] = useState(false);
+  const [scheduleConfirmed, setScheduleConfirmed] = useState(false);
 
-  const applyTimeToConfig = () => {
+  // Calendar grid
+  const calendarDays = useMemo(() => {
+    const daysInMonth = getDaysInMonth(viewYear, viewMonth);
+    const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
+    const prevMonthDays = getDaysInMonth(viewYear, viewMonth - 1);
+    const cells: { day: number; inMonth: boolean; date: Date }[] = [];
+
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const d = prevMonthDays - i;
+      cells.push({ day: d, inMonth: false, date: new Date(viewYear, viewMonth - 1, d) });
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      cells.push({ day: d, inMonth: true, date: new Date(viewYear, viewMonth, d) });
+    }
+    const remaining = 42 - cells.length;
+    for (let d = 1; d <= remaining; d++) {
+      cells.push({ day: d, inMonth: false, date: new Date(viewYear, viewMonth + 1, d) });
+    }
+    return cells;
+  }, [viewYear, viewMonth]);
+
+  const isSameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  const isToday = (d: Date) => isSameDay(d, today);
+
+  // Check if a date is a scheduled send date
+  const isScheduledDate = (d: Date) => {
+    if (!scheduleConfirmed) return false;
+    if (d < startDate && !isSameDay(d, startDate)) return false;
+    if (hasEndDate && endDate && d > endDate && !isSameDay(d, endDate)) return false;
+
+    if (repeatMode === "none") return isSameDay(d, selectedDate);
+    if (repeatMode === "daily") return true;
+    if (repeatMode === "weekly") return d.getDay() === selectedDate.getDay();
+    if (repeatMode === "monthly") return d.getDate() === selectedDate.getDate();
+    return false;
+  };
+
+  const navMonth = (delta: number) => {
+    let m = viewMonth + delta;
+    let y = viewYear;
+    if (m < 0) { m = 11; y--; }
+    if (m > 11) { m = 0; y++; }
+    setViewMonth(m);
+    setViewYear(y);
+  };
+
+  const handleDateClick = (d: Date) => {
+    setSelectedDate(d);
+    setScheduleConfirmed(false);
+  };
+
+  const confirmSchedule = () => {
     const h24 = schedulePeriod === "AM" ? (scheduleHour === 12 ? 0 : scheduleHour) : (scheduleHour === 12 ? 12 : scheduleHour + 12);
     const timeStr = `${String(h24).padStart(2, "0")}:${String(scheduleMinute).padStart(2, "0")}`;
     setConfig((p) => ({ ...p, time: timeStr }));
     setScheduleConfirmed(true);
-    toast.success(`Auto-send time confirmed: ${scheduleHour}:${String(scheduleMinute).padStart(2, "0")} ${schedulePeriod}`);
+    const repeatLabel = repeatMode === "none" ? "once" : repeatMode;
+    toast.success(`Schedule confirmed: ${scheduleHour}:${String(scheduleMinute).padStart(2, "0")} ${schedulePeriod}, repeats ${repeatLabel}`);
   };
 
   const totalSent = logs.filter((l) => l.status === "success").length;
-  const totalFailed = logs.filter((l) => l.status === "failed").length;
   const successRate = logs.length > 0 ? Math.round((totalSent / logs.length) * 100) : 0;
 
   const getNextScheduled = () => {
@@ -171,6 +245,8 @@ export default function PMEmailAutomation() {
 
   const emailRef = useRef<HTMLDivElement>(null);
 
+  const formatDateShort = (d: Date) => `${MONTHS[d.getMonth()].slice(0, 3)} ${d.getDate()}, ${d.getFullYear()}`;
+
   return (
     <div className="space-y-4 p-6" ref={emailRef}>
       {/* Header */}
@@ -181,7 +257,7 @@ export default function PMEmailAutomation() {
             Email Report Automation
           </h1>
           <p className="text-[10px] text-muted-foreground">
-            Automated nightly PM dashboard reports to {config.recipient}
+            Automated PM dashboard reports to {config.recipient}
           </p>
         </div>
         <button onClick={async () => { if (emailRef.current) { await downloadAsImage(emailRef.current, "email-report"); toast.success("Image downloaded"); } }} className="p-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"><Download className="w-4 h-4" /></button>
@@ -209,102 +285,219 @@ export default function PMEmailAutomation() {
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        {/* Schedule Config */}
-        <div className="col-span-1 space-y-4">
+      {/* Main content: Calendar Scheduler + Settings + History */}
+      <div className="grid grid-cols-12 gap-4">
+
+        {/* Calendar Scheduler — Google Calendar style */}
+        <div className="col-span-5">
           <Card className="bg-card border-border">
-            <CardContent className="p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Settings className="w-4 h-4 text-muted-foreground" />
-                <h3 className="text-sm font-bold text-foreground">Schedule Settings</h3>
+            <CardContent className="p-4">
+              {/* Calendar Header */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="w-4 h-4 text-primary" />
+                  <h3 className="text-sm font-bold text-foreground">{MONTHS[viewMonth]} {viewYear}</h3>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => { setViewMonth(today.getMonth()); setViewYear(today.getFullYear()); }} className="px-2 py-0.5 rounded border border-border text-[9px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">Today</button>
+                  <button onClick={() => navMonth(-1)} className="p-1 rounded hover:bg-secondary text-muted-foreground"><ChevronLeft className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => navMonth(1)} className="p-1 rounded hover:bg-secondary text-muted-foreground"><ChevronRight className="w-3.5 h-3.5" /></button>
+                </div>
               </div>
 
-              <div className="flex items-center justify-between mb-4 py-2 px-3 rounded-lg bg-background border border-border">
-                <span className="text-xs text-foreground">Auto-send enabled</span>
+              {/* Day headers */}
+              <div className="grid grid-cols-7 mb-1">
+                {DAYS.map((d) => (
+                  <div key={d} className="text-center text-[8px] font-bold text-muted-foreground py-1">{d}</div>
+                ))}
+              </div>
+
+              {/* Calendar grid */}
+              <div className="grid grid-cols-7">
+                {calendarDays.map((cell, i) => {
+                  const selected = isSameDay(cell.date, selectedDate);
+                  const todayCell = isToday(cell.date);
+                  const scheduled = isScheduledDate(cell.date);
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => cell.inMonth && handleDateClick(cell.date)}
+                      className={`relative h-8 flex items-center justify-center text-[10px] rounded-full transition-all
+                        ${!cell.inMonth ? "text-muted-foreground/30 cursor-default" : "cursor-pointer hover:bg-secondary"}
+                        ${selected ? "bg-primary text-primary-foreground font-bold" : ""}
+                        ${todayCell && !selected ? "ring-1 ring-primary text-primary font-bold" : ""}
+                        ${scheduled && !selected ? "bg-primary/15 text-primary font-semibold" : ""}
+                        ${cell.inMonth && !selected && !todayCell && !scheduled ? "text-foreground" : ""}
+                      `}
+                    >
+                      {cell.day}
+                      {scheduled && !selected && (
+                        <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-primary" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Selected date info */}
+              <div className="mt-3 pt-3 border-t border-border">
+                <div className="text-[9px] text-muted-foreground mb-1">Selected</div>
+                <div className="text-xs font-semibold text-foreground">
+                  {selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+                </div>
+              </div>
+
+              {/* Time Picker */}
+              <div className="mt-3 pt-3 border-t border-border">
+                <div className="text-[9px] text-muted-foreground mb-2 flex items-center gap-1"><Clock className="w-3 h-3" /> Send Time</div>
+                <div className="flex items-center gap-2">
+                  {/* Hour */}
+                  <div className="flex-1">
+                    <select
+                      value={scheduleHour}
+                      onChange={(e) => { setScheduleHour(Number(e.target.value)); setScheduleConfirmed(false); }}
+                      className="w-full bg-background border border-border rounded-lg px-2 py-1.5 text-xs text-foreground outline-none text-center font-mono font-bold"
+                    >
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map((h) => (
+                        <option key={h} value={h}>{String(h).padStart(2, "0")}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <span className="text-foreground font-bold text-sm">:</span>
+                  {/* Minute */}
+                  <div className="flex-1">
+                    <select
+                      value={scheduleMinute}
+                      onChange={(e) => { setScheduleMinute(Number(e.target.value)); setScheduleConfirmed(false); }}
+                      className="w-full bg-background border border-border rounded-lg px-2 py-1.5 text-xs text-foreground outline-none text-center font-mono font-bold"
+                    >
+                      {Array.from({ length: 60 }, (_, i) => i).map((m) => (
+                        <option key={m} value={m}>{String(m).padStart(2, "0")}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* AM/PM */}
+                  <div className="flex rounded-lg overflow-hidden border border-border">
+                    <button
+                      onClick={() => { setSchedulePeriod("AM"); setScheduleConfirmed(false); }}
+                      className={`px-2.5 py-1.5 text-[10px] font-bold transition-colors ${schedulePeriod === "AM" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:text-foreground"}`}
+                    >AM</button>
+                    <button
+                      onClick={() => { setSchedulePeriod("PM"); setScheduleConfirmed(false); }}
+                      className={`px-2.5 py-1.5 text-[10px] font-bold transition-colors ${schedulePeriod === "PM" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:text-foreground"}`}
+                    >PM</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Repeat */}
+              <div className="mt-3 pt-3 border-t border-border">
+                <div className="text-[9px] text-muted-foreground mb-2 flex items-center gap-1"><Repeat className="w-3 h-3" /> Repeat</div>
+                <div className="flex gap-1.5">
+                  {(["none", "daily", "weekly", "monthly"] as RepeatMode[]).map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => { setRepeatMode(mode); setScheduleConfirmed(false); }}
+                      className={`flex-1 px-2 py-1.5 rounded-lg text-[9px] font-semibold capitalize transition-colors border ${
+                        repeatMode === mode
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background text-muted-foreground border-border hover:text-foreground hover:bg-secondary"
+                      }`}
+                    >
+                      {mode === "none" ? "Once" : mode}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Start / End dates */}
+              {repeatMode !== "none" && (
+                <div className="mt-3 pt-3 border-t border-border space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <div className="text-[8px] text-muted-foreground mb-0.5">Start Date</div>
+                      <input
+                        type="date"
+                        value={startDate.toISOString().split("T")[0]}
+                        onChange={(e) => { setStartDate(new Date(e.target.value)); setScheduleConfirmed(false); }}
+                        className="w-full bg-background border border-border rounded-lg px-2 py-1.5 text-[10px] text-foreground outline-none"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <div className="text-[8px] text-muted-foreground">End Date</div>
+                        <button
+                          onClick={() => { setHasEndDate(!hasEndDate); setScheduleConfirmed(false); }}
+                          className={`w-6 h-3 rounded-full transition-colors relative ${hasEndDate ? "bg-primary" : "bg-muted"}`}
+                        >
+                          <div className="w-2.5 h-2.5 rounded-full bg-foreground absolute top-[1px] transition-all" style={{ left: hasEndDate ? 12 : 1 }} />
+                        </button>
+                      </div>
+                      {hasEndDate ? (
+                        <input
+                          type="date"
+                          value={endDate ? endDate.toISOString().split("T")[0] : ""}
+                          onChange={(e) => { setEndDate(new Date(e.target.value)); setScheduleConfirmed(false); }}
+                          className="w-full bg-background border border-border rounded-lg px-2 py-1.5 text-[10px] text-foreground outline-none"
+                        />
+                      ) : (
+                        <div className="w-full bg-background border border-border rounded-lg px-2 py-1.5 text-[10px] text-muted-foreground">No end</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Schedule Summary + Confirm */}
+              <div className="mt-4 pt-3 border-t border-border">
+                <div className="bg-background rounded-lg p-3 border border-border mb-3">
+                  <div className="text-[9px] text-muted-foreground mb-1">Schedule Summary</div>
+                  <div className="text-[11px] font-semibold text-foreground">
+                    📧 Send at <span className="text-primary font-mono">{scheduleHour}:{String(scheduleMinute).padStart(2, "0")} {schedulePeriod}</span>
+                    {repeatMode === "none" && <span> on {formatDateShort(selectedDate)}</span>}
+                    {repeatMode === "daily" && <span>, repeats <span className="text-primary">daily</span></span>}
+                    {repeatMode === "weekly" && <span>, repeats every <span className="text-primary">{selectedDate.toLocaleDateString("en-US", { weekday: "long" })}</span></span>}
+                    {repeatMode === "monthly" && <span>, repeats monthly on <span className="text-primary">day {selectedDate.getDate()}</span></span>}
+                  </div>
+                  {repeatMode !== "none" && (
+                    <div className="text-[9px] text-muted-foreground mt-1">
+                      From {formatDateShort(startDate)}{hasEndDate && endDate ? ` to ${formatDateShort(endDate)}` : " — no end date"}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  onClick={confirmSchedule}
+                  disabled={scheduleConfirmed}
+                  className={`w-full text-xs font-bold ${scheduleConfirmed ? "bg-accent/20 text-accent border border-accent/30 hover:bg-accent/20" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
+                >
+                  {scheduleConfirmed ? (
+                    <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Schedule Confirmed</span>
+                  ) : (
+                    <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /> Confirm Schedule</span>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right column: Settings + Send */}
+        <div className="col-span-3 space-y-4">
+          <Card className="bg-card border-border">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Settings className="w-4 h-4 text-muted-foreground" />
+                <h3 className="text-sm font-bold text-foreground">Settings</h3>
+              </div>
+
+              <div className="flex items-center justify-between mb-3 py-2 px-3 rounded-lg bg-background border border-border">
+                <span className="text-xs text-foreground">Auto-send</span>
                 <button
                   onClick={() => setConfig((p) => ({ ...p, enabled: !p.enabled }))}
                   className={`w-10 h-5 rounded-full transition-colors relative ${config.enabled ? "bg-accent" : "bg-muted"}`}
                 >
                   <div className="w-4 h-4 rounded-full bg-foreground absolute top-0.5 transition-all" style={{ left: config.enabled ? 22 : 2 }} />
                 </button>
-              </div>
-
-              <div className="mb-4">
-                <label className="text-[10px] text-muted-foreground block mb-2">Send Time</label>
-                <div className="bg-background border border-border rounded-lg p-3 space-y-3">
-                  {/* Hour Slider */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] text-muted-foreground">Hour</span>
-                      <span className="text-xs font-bold text-foreground">{scheduleHour}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={1}
-                      max={12}
-                      value={scheduleHour}
-                      onChange={(e) => { setScheduleHour(Number(e.target.value)); setScheduleConfirmed(false); }}
-                      className="w-full h-2 rounded-full appearance-none cursor-pointer bg-secondary accent-primary"
-                    />
-                    <div className="flex justify-between text-[7px] text-muted-foreground mt-0.5">
-                      <span>1</span><span>6</span><span>12</span>
-                    </div>
-                  </div>
-                  {/* Minute Slider */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] text-muted-foreground">Minute</span>
-                      <span className="text-xs font-bold text-foreground">{String(scheduleMinute).padStart(2, "0")}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={0}
-                      max={59}
-                      value={scheduleMinute}
-                      onChange={(e) => { setScheduleMinute(Number(e.target.value)); setScheduleConfirmed(false); }}
-                      className="w-full h-2 rounded-full appearance-none cursor-pointer bg-secondary accent-primary"
-                    />
-                    <div className="flex justify-between text-[7px] text-muted-foreground mt-0.5">
-                      <span>00</span><span>30</span><span>59</span>
-                    </div>
-                  </div>
-                  {/* AM/PM Toggle */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] text-muted-foreground">Period:</span>
-                    <div className="flex rounded-lg overflow-hidden border border-border">
-                      <button
-                        onClick={() => { setSchedulePeriod("AM"); setScheduleConfirmed(false); }}
-                        className={`px-3 py-1 text-[10px] font-bold transition-colors ${schedulePeriod === "AM" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:text-foreground"}`}
-                      >
-                        AM
-                      </button>
-                      <button
-                        onClick={() => { setSchedulePeriod("PM"); setScheduleConfirmed(false); }}
-                        className={`px-3 py-1 text-[10px] font-bold transition-colors ${schedulePeriod === "PM" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:text-foreground"}`}
-                      >
-                        PM
-                      </button>
-                    </div>
-                  </div>
-                  {/* Preview + Confirm */}
-                  <div className="flex items-center justify-between pt-1 border-t border-border">
-                    <span className="text-[10px] text-foreground font-mono font-semibold">
-                      {scheduleHour}:{String(scheduleMinute).padStart(2, "0")} {schedulePeriod}
-                    </span>
-                    <Button
-                      size="sm"
-                      onClick={applyTimeToConfig}
-                      disabled={scheduleConfirmed}
-                      className={`text-[10px] px-3 py-1 h-auto ${scheduleConfirmed ? "bg-accent/20 text-accent border-accent/30" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
-                    >
-                      {scheduleConfirmed ? (
-                        <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Confirmed</span>
-                      ) : (
-                        <span className="flex items-center gap-1"><Sparkles className="w-3 h-3" /> Confirm Schedule</span>
-                      )}
-                    </Button>
-                  </div>
-                </div>
               </div>
 
               <div className="mb-3">
@@ -322,8 +515,8 @@ export default function PMEmailAutomation() {
                 </select>
               </div>
 
-              <div className="mb-4">
-                <label className="text-[10px] text-muted-foreground block mb-1">Recipient Email</label>
+              <div className="mb-3">
+                <label className="text-[10px] text-muted-foreground block mb-1">Recipient</label>
                 <input
                   type="email"
                   value={config.recipient}
@@ -334,7 +527,7 @@ export default function PMEmailAutomation() {
 
               <div>
                 <label className="text-[10px] text-muted-foreground block mb-2">Report Sections</label>
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   {REPORT_SECTIONS.map((sec) => {
                     const Icon = sec.icon;
                     const included = config.sections.includes(sec.id);
@@ -342,29 +535,19 @@ export default function PMEmailAutomation() {
                       <button
                         key={sec.id}
                         onClick={() => toggleSection(sec.id)}
-                        className={`w-full flex items-center gap-2.5 py-2 px-3 rounded-lg border text-left transition-all ${
-                          included
-                            ? "border-opacity-30 bg-opacity-5"
-                            : "border-border bg-transparent opacity-40"
+                        className={`w-full flex items-center gap-2 py-1.5 px-2.5 rounded-lg border text-left transition-all ${
+                          included ? "border-opacity-30 bg-opacity-5" : "border-border bg-transparent opacity-40"
                         }`}
                         style={{
                           borderColor: included ? sec.color + "44" : undefined,
                           backgroundColor: included ? sec.color + "08" : undefined,
                         }}
                       >
-                        <div
-                          className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                            included ? "border-primary bg-primary" : "border-muted"
-                          }`}
-                        >
-                          {included && <CheckCircle2 className="w-3 h-3 text-primary-foreground" />}
+                        <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-all ${included ? "border-primary bg-primary" : "border-muted"}`}>
+                          {included && <CheckCircle2 className="w-2.5 h-2.5 text-primary-foreground" />}
                         </div>
-                        <Icon className="w-3.5 h-3.5" style={{ color: sec.color }} />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[10px] font-semibold" style={{ color: included ? sec.color : undefined }}>
-                            {sec.label}
-                          </div>
-                        </div>
+                        <Icon className="w-3 h-3" style={{ color: sec.color }} />
+                        <span className="text-[9px] font-semibold" style={{ color: included ? sec.color : undefined }}>{sec.label}</span>
                       </button>
                     );
                   })}
@@ -374,7 +557,7 @@ export default function PMEmailAutomation() {
               <Button
                 onClick={handleManualSend}
                 disabled={isSending || config.sections.length === 0}
-                className="w-full mt-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs disabled:opacity-50"
+                className="w-full mt-3 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs disabled:opacity-50"
               >
                 {isSending ? (
                   <span className="flex items-center gap-2">
@@ -388,7 +571,7 @@ export default function PMEmailAutomation() {
                   </span>
                 )}
               </Button>
-              <p className="text-[8px] text-muted-foreground text-center mt-2">
+              <p className="text-[8px] text-muted-foreground text-center mt-1">
                 {config.sections.length} sections selected
               </p>
             </CardContent>
@@ -396,10 +579,10 @@ export default function PMEmailAutomation() {
         </div>
 
         {/* Email History Log */}
-        <div className="col-span-2">
+        <div className="col-span-4">
           <Card className="bg-card border-border">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between mb-4">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-muted-foreground" />
                   Send History
@@ -409,7 +592,7 @@ export default function PMEmailAutomation() {
                 </Badge>
               </div>
 
-              <div className="space-y-2 max-h-[560px] overflow-y-auto">
+              <div className="space-y-2 max-h-[520px] overflow-y-auto">
                 {logs.map((log) => {
                   const isSuccess = log.status === "success";
                   const date = new Date(log.sentAt);
@@ -417,73 +600,55 @@ export default function PMEmailAutomation() {
                   return (
                     <div
                       key={log.id}
-                      className={`flex items-start gap-3 py-3 px-4 rounded-lg border transition-colors ${
+                      className={`flex items-start gap-2 py-2.5 px-3 rounded-lg border transition-colors ${
                         isSuccess ? "bg-background border-border/50" : "bg-destructive/5 border-destructive/15"
                       }`}
                     >
                       <div className="mt-0.5 shrink-0">
-                        {isSuccess ? (
-                          <CheckCircle2 className="w-4 h-4 text-accent" />
-                        ) : (
-                          <XCircle className="w-4 h-4 text-destructive" />
-                        )}
+                        {isSuccess ? <CheckCircle2 className="w-3.5 h-3.5 text-accent" /> : <XCircle className="w-3.5 h-3.5 text-destructive" />}
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-semibold text-foreground">
-                            {date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="text-[10px] font-semibold text-foreground">
+                            {date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                           </span>
-                          <span className="text-[10px] text-muted-foreground">
+                          <span className="text-[9px] text-muted-foreground">
                             {date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                           </span>
-                          <Badge
-                            className={`text-[7px] px-1.5 ${
-                              log.trigger === "scheduled"
-                                ? "bg-primary/10 text-primary border-primary/20"
-                                : "bg-warning/10 text-warning border-warning/20"
-                            }`}
-                          >
-                            {log.trigger === "scheduled" ? "⏰ Scheduled" : "✋ Manual"}
+                          <Badge className={`text-[6px] px-1 ${log.trigger === "scheduled" ? "bg-primary/10 text-primary border-primary/20" : "bg-warning/10 text-warning border-warning/20"}`}>
+                            {log.trigger === "scheduled" ? "⏰" : "✋"}
                           </Badge>
                         </div>
 
-                        <div className="text-[9px] text-muted-foreground mb-1.5">
-                          To: {log.recipient}
-                          {log.emailId && <span className="ml-2">ID: {log.emailId}</span>}
+                        <div className="text-[8px] text-muted-foreground mb-1 truncate">
+                          {log.recipient}
                         </div>
 
-                        <div className="flex flex-wrap gap-1">
-                          {log.reportSections.map((secId) => {
+                        <div className="flex flex-wrap gap-0.5">
+                          {log.reportSections.slice(0, 3).map((secId) => {
                             const sec = REPORT_SECTIONS.find((s) => s.id === secId);
                             return sec ? (
-                              <span
-                                key={secId}
-                                className="px-1.5 py-0.5 rounded text-[7px] font-medium"
-                                style={{ backgroundColor: sec.color + "12", color: sec.color }}
-                              >
+                              <span key={secId} className="px-1 py-0.5 rounded text-[6px] font-medium" style={{ backgroundColor: sec.color + "12", color: sec.color }}>
                                 {sec.label}
                               </span>
                             ) : null;
                           })}
+                          {log.reportSections.length > 3 && (
+                            <span className="px-1 py-0.5 rounded text-[6px] text-muted-foreground">+{log.reportSections.length - 3}</span>
+                          )}
                         </div>
 
                         {log.error && (
-                          <div className="flex items-center gap-1.5 mt-1.5 text-[9px] text-destructive">
-                            <AlertTriangle className="w-3 h-3" />
+                          <div className="flex items-center gap-1 mt-1 text-[8px] text-destructive">
+                            <AlertTriangle className="w-2.5 h-2.5" />
                             {log.error}
                           </div>
                         )}
                       </div>
 
-                      <Badge
-                        className={`text-[8px] shrink-0 ${
-                          isSuccess
-                            ? "bg-accent/10 text-accent border-accent/20"
-                            : "bg-destructive/10 text-destructive border-destructive/20"
-                        }`}
-                      >
-                        {isSuccess ? "✓ Delivered" : "✗ Failed"}
+                      <Badge className={`text-[7px] shrink-0 ${isSuccess ? "bg-accent/10 text-accent border-accent/20" : "bg-destructive/10 text-destructive border-destructive/20"}`}>
+                        {isSuccess ? "✓" : "✗"}
                       </Badge>
                     </div>
                   );
