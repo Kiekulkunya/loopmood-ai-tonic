@@ -8,8 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useApp } from "@/contexts/AppContext";
-
+import { useApp, type CustomerReview } from "@/contexts/AppContext";
 const FEATURES = [
   { id: "classifier", name: "Startup Classifier", icon: FlaskConical, color: "#3B82F6", desc: "AI-powered startup stage classification from articles, URLs, and documents" },
   { id: "decoded", name: "Decoded X Return", icon: TrendingUp, color: "#06B6D4", desc: "M×P×T×F risk framework with 7-scenario probability analysis" },
