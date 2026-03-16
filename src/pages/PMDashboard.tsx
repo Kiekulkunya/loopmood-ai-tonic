@@ -145,39 +145,7 @@ export default function PMDashboard() {
       )}
 
       {activeSection === "feedback" && (
-        <div className="space-y-4">
-          <div className="flex justify-end mb-2"><button onClick={() => toast.info("Feedback data refreshed")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#1E293B] bg-[#1E293B] hover:bg-[#334155] text-slate-400 hover:text-white transition-colors"><RotateCcw className="w-3 h-3" />Refresh</button></div>
-          <div className="grid grid-cols-4 gap-3">
-            <KPI icon={MessageSquare} label="Total Responses" value={feedbackStats.total} color="#3B82F6" />
-            <KPI icon={Star} label="Avg Satisfaction" value={`${feedbackStats.avgSat} / 5`} color="#F59E0B" target="≥ 4.0" />
-            <KPI icon={ThumbsUp} label="NPS Score" value={feedbackStats.npsScore} color={feedbackStats.npsScore >= 45 ? "#10B981" : "#F97316"} target="≥ 45" sub={`${feedbackStats.promoters}P / ${feedbackStats.passives}N / ${feedbackStats.detractors}D`} />
-            <KPI icon={Heart} label="Response Rate" value="68%" color="#EC4899" target="≥ 60%" />
-          </div>
-          <ChartCard title="🏆 Feature Ranking by User Importance" subtitle="Aggregated from user drag-and-drop ranking surveys">
-            <div className="space-y-2">{feedbackStats.avgRanking.map((f, idx) => {
-              const medalColors = ["#FFD700","#C0C0C0","#CD7F32"]; const isMedal = idx < 3;
-              return (<div key={f.id} className="flex items-center gap-3 py-3 px-4 rounded-lg border transition-all" style={{ borderColor: isMedal ? (medalColors[idx]) + "33" : "#1E293B", backgroundColor: isMedal ? (f.color) + "05" : "#0B0F19" }}>
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black" style={{ backgroundColor: isMedal ? (medalColors[idx]) + "20" : "#1E293B", color: isMedal ? medalColors[idx] : "#64748B" }}>{idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`}</div>
-                <span className="text-base">{f.emoji}</span>
-                <div className="flex-1 min-w-0"><div className="text-xs font-bold" style={{ color: f.color }}>{f.label}</div><div className="text-[9px] text-slate-500">Avg rank: {f.avgRank} · Voted #1: {f.firstCount}× · In top 3: {f.top3Count}×</div></div>
-                <div className="w-24 h-2 bg-[#1E293B] rounded-full overflow-hidden"><div className="h-full rounded-full" style={{ width: `${((7 - f.avgRank) / 6) * 100}%`, backgroundColor: f.color }} /></div>
-                <div className="w-10 text-right text-xs font-bold" style={{ color: f.color }}>{f.avgRank}</div>
-              </div>);
-            })}</div>
-          </ChartCard>
-          <div className="grid grid-cols-2 gap-4">
-            <ChartCard title="Most Valuable Feature Votes"><ResponsiveContainer width="100%" height={220}><PieChart><Pie data={feedbackStats.mvData} cx="50%" cy="50%" innerRadius={40} outerRadius={75} dataKey="count" paddingAngle={3} label={({ label, pct }: any) => `${label}: ${pct}%`} labelLine={{ stroke: "#334155" }}>{feedbackStats.mvData.map((f) => <Cell key={f.id} fill={f.color} stroke="#111827" strokeWidth={2} />)}</Pie><Tooltip {...TT} /></PieChart></ResponsiveContainer></ChartCard>
-            <ChartCard title="Satisfaction Distribution"><ResponsiveContainer width="100%" height={220}><BarChart data={feedbackStats.satDist}><CartesianGrid strokeDasharray="3 3" stroke="#1E293B" /><XAxis dataKey="label" tick={{ fill: "#94A3B8", fontSize: 10 }} /><YAxis tick={{ fill: "#94A3B8", fontSize: 9 }} allowDecimals={false} /><Tooltip {...TT} formatter={(v: number) => [`${v} responses`, "Count"]} /><Bar dataKey="count" radius={[4,4,0,0]} barSize={32}>{feedbackStats.satDist.map((d,i) => <Cell key={i} fill={d.color} />)}</Bar></BarChart></ResponsiveContainer></ChartCard>
-          </div>
-          <ChartCard title="💡 User Suggestions" subtitle={`${feedbackStats.suggestions.length} actionable suggestions`}>
-            <div className="space-y-2 max-h-[300px] overflow-y-auto">{feedbackStats.suggestions.map((s, i) => (
-              <div key={i} className="flex items-start gap-3 py-3 px-4 rounded-lg bg-[#0B0F19] border border-[#1E293B]/50">
-                <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                <div className="flex-1 min-w-0"><p className="text-xs text-white leading-relaxed">"{s.text}"</p><div className="flex items-center gap-3 mt-1.5"><span className="text-[9px] text-slate-500">{s.user}</span><span className="text-[9px] text-slate-600">{s.date}</span><Badge className={`text-[7px] px-1 ${s.nps >= 9 ? "bg-emerald-500/10 text-emerald-400" : s.nps >= 7 ? "bg-amber-500/10 text-amber-400" : "bg-red-500/10 text-red-400"}`}>NPS: {s.nps}</Badge></div></div>
-              </div>
-            ))}</div>
-          </ChartCard>
-        </div>
+        <FeedbackInsightsSection feedbackStats={feedbackStats} />
       )}
 
       {activeSection === "growth" && (

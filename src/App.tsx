@@ -47,6 +47,7 @@ const App = () => (
                   <Route path="risk-pwmoic" element={<RiskPWMOIC />} />
                   <Route path="valuation" element={<StartupValuation />} />
                   <Route path="nova-dashboard" element={<NovaDashboard />} />
+                  <Route path="feedback" element={<CustomerFeedback />} />
                   <Route path="pm/log" element={<PMLog />} />
                   <Route path="pm/traffic" element={<PMTraffic />} />
                   <Route path="pm/dashboard" element={<PMDashboard />} />

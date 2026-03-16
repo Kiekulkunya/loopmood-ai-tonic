@@ -16,6 +16,7 @@ import {
   Workflow,
   Mail,
   Lock,
+  MessageSquare,
 } from "lucide-react";
 import { ChatbotFAB } from "@/components/Chatbot";
 import ToastContainer from "@/components/ToastContainer";
