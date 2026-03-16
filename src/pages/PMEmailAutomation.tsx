@@ -64,6 +64,18 @@ export default function PMEmailAutomation() {
 
   const [logs, setLogs] = useState<EmailLog[]>(INITIAL_LOGS);
   const [isSending, setIsSending] = useState(false);
+  const [scheduleHour, setScheduleHour] = useState(12);
+  const [scheduleMinute, setScheduleMinute] = useState(0);
+  const [schedulePeriod, setSchedulePeriod] = useState<"AM" | "PM">("AM");
+  const [scheduleConfirmed, setScheduleConfirmed] = useState(true);
+
+  const applyTimeToConfig = () => {
+    const h24 = schedulePeriod === "AM" ? (scheduleHour === 12 ? 0 : scheduleHour) : (scheduleHour === 12 ? 12 : scheduleHour + 12);
+    const timeStr = `${String(h24).padStart(2, "0")}:${String(scheduleMinute).padStart(2, "0")}`;
+    setConfig((p) => ({ ...p, time: timeStr }));
+    setScheduleConfirmed(true);
+    toast.success(`Auto-send time confirmed: ${scheduleHour}:${String(scheduleMinute).padStart(2, "0")} ${schedulePeriod}`);
+  };
 
   const totalSent = logs.filter((l) => l.status === "success").length;
   const totalFailed = logs.filter((l) => l.status === "failed").length;
