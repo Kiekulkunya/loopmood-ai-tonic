@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Mail, Clock, CheckCircle2, XCircle, Send,
   Calendar, Settings, Play, Pause, AlertTriangle,
-  FileText, Users, TrendingUp, Target, Building2, Rocket, Crown,
+  FileText, Users, TrendingUp, Target, Building2, Rocket, Crown, Server,
   Sparkles, Shield, Download, ChevronLeft, ChevronRight, Repeat, CalendarDays,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
