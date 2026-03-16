@@ -110,7 +110,7 @@ function NodeCard({ node }: { node: SysNode }) {
   const nodeConns = CONNECTIONS.filter(c => c.from === node.id || c.to === node.id);
   return (
     <div onClick={() => setOpen(!open)} className={`cursor-pointer rounded-xl border p-4 transition-all duration-300 ${open ? "ring-1 ring-offset-1 ring-offset-[#0B0F19] scale-[1.01]" : "hover:border-[#334155]"}`}
-      style={{ borderColor: open ? node.color+"55" : "#1E293B", backgroundColor: open ? node.color+"08" : "#111827", ringColor: open ? node.color : undefined }}>
+      style={{ borderColor: open ? node.color+"55" : "#1E293B", backgroundColor: open ? node.color+"08" : "#111827" }}>
       <div className="flex items-start gap-3">
         <div className="w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0" style={{ backgroundColor: node.color+"15" }}>{node.icon}</div>
         <div className="flex-1 min-w-0">
