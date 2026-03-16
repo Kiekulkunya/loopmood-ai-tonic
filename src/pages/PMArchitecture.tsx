@@ -76,7 +76,6 @@ const LAYERS = [
 
 const CONNECTIONS = [
   {from:"lovable",to:"frontend",label:"Code Gen",type:"tool"},
-  {from:"lovable",to:"github",label:"Auto-Deploy",type:"tool"},
   {from:"claude",to:"edgefn",label:"Deep Analysis",type:"api"},
   {from:"claude",to:"aienhance",label:"Enhancement",type:"api"},
   {from:"chatprd",to:"metrics",label:"PRD Framework",type:"tool"},
@@ -85,8 +84,13 @@ const CONNECTIONS = [
   {from:"gemini",to:"chatbot",label:"Chat Responses",type:"api"},
   {from:"frontend",to:"auth",label:"OAuth",type:"auth"},
   {from:"frontend",to:"edgefn",label:"API Calls",type:"data"},
-  {from:"frontend",to:"classifier",label:"Input Data",type:"data"},
+  {from:"frontend",to:"prompts",label:"Input Data",type:"data"},
   {from:"frontend",to:"chatbot",label:"Chat Messages",type:"interaction"},
+  {from:"prompts",to:"classifier",label:"Zero/Few-Shot",type:"data"},
+  {from:"prompts",to:"pwmoic",label:"Structured Reasoning",type:"data"},
+  {from:"prompts",to:"valuation",label:"Constraint-Based",type:"data"},
+  {from:"prompts",to:"aienhance",label:"Context Injection",type:"data"},
+  {from:"prompts",to:"chatbot",label:"Meta/System",type:"data"},
   {from:"classifier",to:"edgefn",label:"AI Request",type:"api"},
   {from:"pwmoic",to:"valuation",label:"Scores",type:"data"},
   {from:"valuation",to:"nova",label:"ValuationContext",type:"data"},
@@ -102,6 +106,8 @@ const CONNECTIONS = [
   {from:"security",to:"supabase",label:"RLS Policies",type:"security"},
   {from:"security",to:"edgefn",label:"CORS + Keys",type:"security"},
   {from:"pmdash",to:"metrics",label:"Targets",type:"data"},
+  {from:"metrics",to:"pdfexport",label:"Report Gen",type:"data"},
+  {from:"pdfexport",to:"mvp",label:"Launch Ready",type:"data"},
   {from:"display",to:"frontend",label:"Layout Mode",type:"interaction"},
 ];
 
