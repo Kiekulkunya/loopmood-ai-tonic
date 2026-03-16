@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useApp } from "@/contexts/AppContext";
+import { useApp, type CustomerReview } from "@/contexts/AppContext";
 import { toast } from "sonner";
 import { RotateCcw, Download } from "lucide-react";
 import { downloadAsImage } from "@/lib/downloadUtils";
