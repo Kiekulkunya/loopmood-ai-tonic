@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Mail, Clock, CheckCircle2, XCircle, Send,
   Calendar, Settings, Play, Pause, AlertTriangle,
-  FileText, Users, TrendingUp, Target, Building2, Rocket, Crown,
+  FileText, Users, TrendingUp, Target, Building2, Rocket, Crown, Server,
   Sparkles, Shield, Download, ChevronLeft, ChevronRight, Repeat, CalendarDays,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,6 +41,7 @@ const REPORT_SECTIONS = [
   { id: "b2b", label: "B2B Pipeline", icon: Building2, color: "#8B5CF6", desc: "Pipeline value, weighted deals, active prospects" },
   { id: "roadmap", label: "Roadmap", icon: Rocket, color: "#EC4899", desc: "Current phase, completed items, progress" },
   { id: "competitive", label: "Competitive", icon: Crown, color: "#F97316", desc: "LoopAI score vs competitors, gap analysis" },
+  { id: "system", label: "System Health", icon: Server, color: "#14B8A6", desc: "Service uptime, latency, infrastructure status" },
 ];
 
 const INITIAL_LOGS: EmailLog[] = [
