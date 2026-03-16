@@ -21,6 +21,7 @@ import PMTraffic from "@/pages/PMTraffic";
 import PMDashboard from "@/pages/PMDashboard";
 import PMArchitecture from "@/pages/PMArchitecture";
 import PMEmailAutomation from "@/pages/PMEmailAutomation";
+import CustomerFeedback from "@/pages/CustomerFeedback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
