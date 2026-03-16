@@ -64,6 +64,18 @@ export default function PMEmailAutomation() {
 
   const [logs, setLogs] = useState<EmailLog[]>(INITIAL_LOGS);
   const [isSending, setIsSending] = useState(false);
+  const [scheduleHour, setScheduleHour] = useState(12);
+  const [scheduleMinute, setScheduleMinute] = useState(0);
+  const [schedulePeriod, setSchedulePeriod] = useState<"AM" | "PM">("AM");
+  const [scheduleConfirmed, setScheduleConfirmed] = useState(true);
+
+  const applyTimeToConfig = () => {
+    const h24 = schedulePeriod === "AM" ? (scheduleHour === 12 ? 0 : scheduleHour) : (scheduleHour === 12 ? 12 : scheduleHour + 12);
+    const timeStr = `${String(h24).padStart(2, "0")}:${String(scheduleMinute).padStart(2, "0")}`;
+    setConfig((p) => ({ ...p, time: timeStr }));
+    setScheduleConfirmed(true);
+    toast.success(`Auto-send time confirmed: ${scheduleHour}:${String(scheduleMinute).padStart(2, "0")} ${schedulePeriod}`);
+  };
 
   const totalSent = logs.filter((l) => l.status === "success").length;
   const totalFailed = logs.filter((l) => l.status === "failed").length;
@@ -217,14 +229,82 @@ export default function PMEmailAutomation() {
                 </button>
               </div>
 
-              <div className="mb-3">
-                <label className="text-[10px] text-muted-foreground block mb-1">Send Time</label>
-                <input
-                  type="time"
-                  value={config.time}
-                  onChange={(e) => setConfig((p) => ({ ...p, time: e.target.value }))}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-xs text-foreground outline-none focus:border-primary/50"
-                />
+              <div className="mb-4">
+                <label className="text-[10px] text-muted-foreground block mb-2">Send Time</label>
+                <div className="bg-background border border-border rounded-lg p-3 space-y-3">
+                  {/* Hour Slider */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[9px] text-muted-foreground">Hour</span>
+                      <span className="text-xs font-bold text-foreground">{scheduleHour}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={1}
+                      max={12}
+                      value={scheduleHour}
+                      onChange={(e) => { setScheduleHour(Number(e.target.value)); setScheduleConfirmed(false); }}
+                      className="w-full h-2 rounded-full appearance-none cursor-pointer bg-secondary accent-primary"
+                    />
+                    <div className="flex justify-between text-[7px] text-muted-foreground mt-0.5">
+                      <span>1</span><span>6</span><span>12</span>
+                    </div>
+                  </div>
+                  {/* Minute Slider */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[9px] text-muted-foreground">Minute</span>
+                      <span className="text-xs font-bold text-foreground">{String(scheduleMinute).padStart(2, "0")}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={59}
+                      value={scheduleMinute}
+                      onChange={(e) => { setScheduleMinute(Number(e.target.value)); setScheduleConfirmed(false); }}
+                      className="w-full h-2 rounded-full appearance-none cursor-pointer bg-secondary accent-primary"
+                    />
+                    <div className="flex justify-between text-[7px] text-muted-foreground mt-0.5">
+                      <span>00</span><span>30</span><span>59</span>
+                    </div>
+                  </div>
+                  {/* AM/PM Toggle */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] text-muted-foreground">Period:</span>
+                    <div className="flex rounded-lg overflow-hidden border border-border">
+                      <button
+                        onClick={() => { setSchedulePeriod("AM"); setScheduleConfirmed(false); }}
+                        className={`px-3 py-1 text-[10px] font-bold transition-colors ${schedulePeriod === "AM" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:text-foreground"}`}
+                      >
+                        AM
+                      </button>
+                      <button
+                        onClick={() => { setSchedulePeriod("PM"); setScheduleConfirmed(false); }}
+                        className={`px-3 py-1 text-[10px] font-bold transition-colors ${schedulePeriod === "PM" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:text-foreground"}`}
+                      >
+                        PM
+                      </button>
+                    </div>
+                  </div>
+                  {/* Preview + Confirm */}
+                  <div className="flex items-center justify-between pt-1 border-t border-border">
+                    <span className="text-[10px] text-foreground font-mono font-semibold">
+                      {scheduleHour}:{String(scheduleMinute).padStart(2, "0")} {schedulePeriod}
+                    </span>
+                    <Button
+                      size="sm"
+                      onClick={applyTimeToConfig}
+                      disabled={scheduleConfirmed}
+                      className={`text-[10px] px-3 py-1 h-auto ${scheduleConfirmed ? "bg-accent/20 text-accent border-accent/30" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
+                    >
+                      {scheduleConfirmed ? (
+                        <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Confirmed</span>
+                      ) : (
+                        <span className="flex items-center gap-1"><Sparkles className="w-3 h-3" /> Confirm Schedule</span>
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </div>
 
               <div className="mb-3">
