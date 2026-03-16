@@ -30,6 +30,7 @@ const USER_NAV = [
   { label: "Unleashing Risk & PWMOIC", icon: Zap, path: "/app/risk-pwmoic" },
   { label: "Valuation Simulator", icon: Target, path: "/app/valuation" },
   { label: "Nova Dashboard", icon: BarChart3, path: "/app/nova-dashboard" },
+  { label: "Customer Feedback", icon: MessageSquare, path: "/app/feedback" },
 ];
 
 const PM_NAV = [
