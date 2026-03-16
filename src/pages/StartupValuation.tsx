@@ -44,7 +44,7 @@ const SCORE_COLORS: Record<number, string> = { 1: "#EF4444", 2: "#F97316", 3: "#
 
 export default function ValuationSimulator() {
   const { weights, setWeights, firmScores, setFirmScores, firmNames, setFirmNames } = useValuation();
-  const { addFeedback } = useApp();
+  const { addFeedback, addCustomerReview } = useApp();
   const [calculated, setCalculated] = useState(true);
   const [isCalc, setIsCalc] = useState(false);
   const [mode, setMode] = useState<"synthetic" | "custom">("synthetic");
