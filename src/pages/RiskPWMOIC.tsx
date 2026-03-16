@@ -159,8 +159,6 @@ export default function RiskPWMOIC() {
   useEffect(() => {
     setTdMkt(totalCap);
   }, [totalCap]);
-  const [tdSeg, setTdSeg] = useState(60);
-  const [tdGeo, setTdGeo] = useState(80);
   const [buCust, setBuCust] = useState(100);
   const [buArpu, setBuArpu] = useState(100000);
   const [vtCust, setVtCust] = useState(100);
