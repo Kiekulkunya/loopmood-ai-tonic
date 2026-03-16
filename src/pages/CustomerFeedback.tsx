@@ -104,7 +104,6 @@ function ReviewCard({ review }: { review: CustomerReview }) {
             </div>
           </div>
         </div>
-        </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: sentimentColor }} />
           <span className="text-[8px] capitalize" style={{ color: sentimentColor }}>{review.sentiment}</span>
