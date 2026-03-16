@@ -16,6 +16,7 @@ import {
   Workflow,
   Mail,
   Lock,
+  MessageSquare,
 } from "lucide-react";
 import { ChatbotFAB } from "@/components/Chatbot";
 import ToastContainer from "@/components/ToastContainer";
@@ -30,6 +31,7 @@ const USER_NAV = [
   { label: "Unleashing Risk & PWMOIC", icon: Zap, path: "/app/risk-pwmoic" },
   { label: "Valuation Simulator", icon: Target, path: "/app/valuation" },
   { label: "Nova Dashboard", icon: BarChart3, path: "/app/nova-dashboard" },
+  { label: "Customer Feedback", icon: MessageSquare, path: "/app/feedback" },
 ];
 
 const PM_NAV = [
@@ -46,6 +48,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/app/risk-pwmoic": "Unleashing Risk & PWMOIC",
   "/app/valuation": "Valuation Simulator",
   "/app/nova-dashboard": "Nova Dashboard",
+  "/app/feedback": "Customer Feedback",
   "/app/pm/log": "Activity Log",
   "/app/pm/traffic": "Traffic Analytics",
   "/app/pm/dashboard": "PM Dashboard",
@@ -60,6 +63,7 @@ const PAGE_ID_TO_PATH: Record<string, string> = {
   risk: "/app/risk-pwmoic",
   valuation: "/app/valuation",
   nova: "/app/nova-dashboard",
+  feedback: "/app/feedback",
   pmlog: "/app/pm/log",
   pmtraffic: "/app/pm/traffic",
   pmdash: "/app/pm/dashboard",
