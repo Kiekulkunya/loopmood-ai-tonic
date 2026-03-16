@@ -41,9 +41,13 @@ serve(async (req) => {
       const functionUrl = `${supabaseUrl}/functions/v1/send-pm-report`;
 
       // Unschedule existing job first (ignore error if not exists)
-      await supabase.rpc('exec_sql', {
-        sql: `SELECT cron.unschedule('${JOB_NAME}')`
-      }).catch(() => {});
+      try {
+        await supabase.rpc('exec_sql', {
+          sql: `SELECT cron.unschedule('${JOB_NAME}')`
+        });
+      } catch (_e) {
+        // Job might not exist yet, that's fine
+      }
 
       // Schedule new cron job
       const scheduleSQL = `
@@ -70,16 +74,20 @@ serve(async (req) => {
         );
       }
 
-      console.log(`[manage-email-schedule] Scheduled: ${cronExpression} for ${recipient}`);
+      console.log(`[manage-email-schedule] Scheduled: ${cronExpression} for ${recipient}`, data);
       return new Response(
         JSON.stringify({ success: true, cronExpression, recipient }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
 
     } else if (action === 'remove') {
-      await supabase.rpc('exec_sql', {
-        sql: `SELECT cron.unschedule('${JOB_NAME}')`
-      }).catch(() => {});
+      try {
+        await supabase.rpc('exec_sql', {
+          sql: `SELECT cron.unschedule('${JOB_NAME}')`
+        });
+      } catch (_e) {
+        // Ignore
+      }
 
       console.log(`[manage-email-schedule] Unscheduled`);
       return new Response(
@@ -88,8 +96,6 @@ serve(async (req) => {
       );
 
     } else if (action === 'status') {
-      // Return current job info - we can't easily query cron.job via RPC,
-      // so just return success
       return new Response(
         JSON.stringify({ success: true }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
