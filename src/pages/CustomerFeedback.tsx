@@ -8,8 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useApp } from "@/contexts/AppContext";
-
+import { useApp, type CustomerReview } from "@/contexts/AppContext";
 const FEATURES = [
   { id: "classifier", name: "Startup Classifier", icon: FlaskConical, color: "#3B82F6", desc: "AI-powered startup stage classification from articles, URLs, and documents" },
   { id: "decoded", name: "Decoded X Return", icon: TrendingUp, color: "#06B6D4", desc: "M×P×T×F risk framework with 7-scenario probability analysis" },
@@ -17,23 +16,9 @@ const FEATURES = [
   { id: "valuation", name: "Valuation Simulator", icon: Target, color: "#A855F7", desc: "Multi-firm comparative scoring across 23 weighted parameters" },
 ];
 
-interface Review {
-  id: string;
-  featureId: string;
-  userName: string;
-  userEmail: string;
-  rating: number;
-  title: string;
-  comment: string;
-  aiEnhanced: boolean;
-  helpful: number;
-  notHelpful: number;
-  createdAt: string;
-  sentiment: "positive" | "neutral" | "negative";
-  userRole: string;
-}
+// Review type is now CustomerReview from AppContext
 
-const SEED_REVIEWS: Review[] = [
+const SEED_REVIEWS: CustomerReview[] = [
   { id: "r1", featureId: "classifier", userName: "Sarah Chen", userEmail: "sarah@startup.io", rating: 5, title: "Game changer for pitch prep", comment: "The AI classifier accurately identified our startup stage from a TechCrunch article about our funding round. The stage probability breakdown gave me confidence going into investor meetings. The keyword extraction is particularly useful for understanding how the market perceives us.", aiEnhanced: false, helpful: 12, notHelpful: 1, createdAt: "2025-03-10T14:30:00Z", sentiment: "positive", userRole: "Founder" },
   { id: "r2", featureId: "classifier", userName: "Mike Rodriguez", userEmail: "mike@vcfund.com", rating: 4, title: "Solid tool, needs PDF parsing improvement", comment: "Works well with URLs and text input. However, when I uploaded a pitch deck PDF, it only extracted partial text. The classification logic is sound — would love to see better document parsing and support for financial spreadsheets.", aiEnhanced: false, helpful: 8, notHelpful: 2, createdAt: "2025-03-09T09:15:00Z", sentiment: "neutral", userRole: "Investor" },
   { id: "r3", featureId: "decoded", userName: "Anna Park", userEmail: "anna@techstars.com", rating: 5, title: "Best risk framework I've seen", comment: "The multiplicative M×P×T×F framework is more realistic than additive models. Being able to toggle between Synthetic and Custom modes makes it perfect for both quick demos and deep analysis. The scenario distribution chart adds great visual context.", aiEnhanced: true, helpful: 15, notHelpful: 0, createdAt: "2025-03-08T16:45:00Z", sentiment: "positive", userRole: "Accelerator PM" },
@@ -82,7 +67,7 @@ function StarRating({ value, onChange, size = 20, readonly = false }: {
   );
 }
 
-function ReviewCard({ review }: { review: Review }) {
+function ReviewCard({ review }: { review: CustomerReview }) {
   const [expanded, setExpanded] = useState(false);
   const [helpfulCount, setHelpfulCount] = useState(review.helpful);
   const [voted, setVoted] = useState<"up" | "down" | null>(null);
@@ -114,7 +99,7 @@ function ReviewCard({ review }: { review: Review }) {
             <div className="flex items-center gap-2 mt-0.5">
               <StarRating value={review.rating} readonly size={12} />
               <span className="text-[9px] text-muted-foreground">
-                {new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                {new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
               </span>
             </div>
           </div>
@@ -153,9 +138,9 @@ function ReviewCard({ review }: { review: Review }) {
 }
 
 export default function CustomerFeedback() {
-  const { logAct } = useApp();
+  const { logAct, customerReviews, addCustomerReview } = useApp();
 
-  const [reviews, setReviews] = useState<Review[]>(SEED_REVIEWS);
+  const allReviews = useMemo(() => [...customerReviews, ...SEED_REVIEWS], [customerReviews]);
   const [activeFeature, setActiveFeature] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"recent" | "rating" | "helpful">("recent");
 
@@ -168,22 +153,22 @@ export default function CustomerFeedback() {
   const [isEnhancing, setIsEnhancing] = useState(false);
 
   const filteredReviews = useMemo(() => {
-    let r = activeFeature === "all" ? [...reviews] : reviews.filter((rev) => rev.featureId === activeFeature);
+    let r = activeFeature === "all" ? [...allReviews] : allReviews.filter((rev) => rev.featureId === activeFeature);
     if (sortBy === "recent") r.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     else if (sortBy === "rating") r.sort((a, b) => b.rating - a.rating);
     else r.sort((a, b) => b.helpful - a.helpful);
     return r;
-  }, [reviews, activeFeature, sortBy]);
+  }, [allReviews, activeFeature, sortBy]);
 
   const featureStats = useMemo(() => {
     return FEATURES.map((f) => {
-      const fReviews = reviews.filter((r) => r.featureId === f.id);
+      const fReviews = allReviews.filter((r) => r.featureId === f.id);
       const avg = fReviews.length > 0 ? fReviews.reduce((a, b) => a + b.rating, 0) / fReviews.length : 0;
       return { ...f, count: fReviews.length, avg: +avg.toFixed(1) };
     });
-  }, [reviews]);
+  }, [allReviews]);
 
-  const overallAvg = reviews.length > 0 ? +(reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1) : 0;
+  const overallAvg = allReviews.length > 0 ? +(allReviews.reduce((a, b) => a + b.rating, 0) / allReviews.length).toFixed(1) : 0;
 
   const handleAIEnhance = () => {
     if (!formComment.trim()) { toast.error("Write a short comment first, then enhance"); return; }
@@ -202,8 +187,8 @@ export default function CustomerFeedback() {
     if (!formTitle.trim()) { toast.error("Please add a review title"); return; }
     if (!formComment.trim()) { toast.error("Please write a comment"); return; }
 
-    const sentiment: Review["sentiment"] = formRating >= 4 ? "positive" : formRating >= 3 ? "neutral" : "negative";
-    const newReview: Review = {
+    const sentiment: CustomerReview["sentiment"] = formRating >= 4 ? "positive" : formRating >= 3 ? "neutral" : "negative";
+    const newReview: CustomerReview = {
       id: `r-${Date.now()}`,
       featureId: formFeature,
       userName: "Anonymous User",
@@ -219,7 +204,7 @@ export default function CustomerFeedback() {
       userRole: formRole,
     };
 
-    setReviews((prev) => [newReview, ...prev]);
+    addCustomerReview(newReview);
     logAct("feedback_review", "customer-feedback");
     setShowForm(false);
     setFormRating(0);
@@ -249,7 +234,7 @@ export default function CustomerFeedback() {
           <CardContent className="p-4 text-center">
             <div className="text-3xl font-black text-amber-400">{overallAvg}</div>
             <StarRating value={Math.round(overallAvg)} readonly size={14} />
-            <div className="text-[9px] text-muted-foreground mt-1">{reviews.length} reviews</div>
+            <div className="text-[9px] text-muted-foreground mt-1">{allReviews.length} reviews</div>
           </CardContent>
         </Card>
         {featureStats.map((f) => {
@@ -294,14 +279,19 @@ export default function CustomerFeedback() {
               </div>
             </div>
 
-            <div className="mb-4">
-              <label className="text-[10px] text-muted-foreground block mb-1.5">Your Rating</label>
-              <div className="flex items-center gap-3">
-                <StarRating value={formRating} onChange={setFormRating} size={28} />
-                {formRating > 0 && (
-                  <span className="text-xs font-semibold" style={{ color: formRating >= 4 ? "#10B981" : formRating >= 3 ? "#F59E0B" : "#EF4444" }}>
-                    {["", "Poor", "Below Average", "Good", "Very Good", "Excellent"][formRating]}
-                  </span>
+            <div className="mb-5">
+              <label className="text-xs font-semibold text-foreground block mb-2">⭐ Your Rating</label>
+              <div className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-amber-400/40 bg-amber-400/5">
+                <StarRating value={formRating} onChange={setFormRating} size={36} />
+                {formRating > 0 ? (
+                  <div className="flex flex-col">
+                    <span className="text-base font-black" style={{ color: formRating >= 4 ? "#10B981" : formRating >= 3 ? "#F59E0B" : "#EF4444" }}>
+                      {["", "😞 Poor", "😐 Below Average", "🙂 Good", "😊 Very Good", "🤩 Excellent"][formRating]}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">{formRating} out of 5 stars</span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-muted-foreground animate-pulse">← Tap a star to rate</span>
                 )}
               </div>
             </div>
@@ -344,7 +334,7 @@ export default function CustomerFeedback() {
       <div className="flex items-center justify-between">
         <div className="flex gap-1.5">
           <button onClick={() => setActiveFeature("all")} className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold border transition-all ${activeFeature === "all" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}>
-            All ({reviews.length})
+            All ({allReviews.length})
           </button>
           {featureStats.map((f) => {
             const Icon = f.icon;

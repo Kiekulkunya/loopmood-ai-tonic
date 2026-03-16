@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useApp } from "@/contexts/AppContext";
+import { useApp, type CustomerReview } from "@/contexts/AppContext";
 import { toast } from "sonner";
 import { RotateCcw, Download } from "lucide-react";
 import { downloadAsImage } from "@/lib/downloadUtils";
@@ -68,7 +68,7 @@ function ChartCard({ title, subtitle, children, className = "" }: { title: strin
 }
 
 export default function PMDashboard() {
-  const { logs } = useApp();
+  const { logs, customerReviews } = useApp();
   const [activeSection, setActiveSection] = useState("overview");
   const latest = MONTHLY_DATA[MONTHLY_DATA.length - 1];
   const prev = MONTHLY_DATA[MONTHLY_DATA.length - 2];
@@ -145,18 +145,22 @@ export default function PMDashboard() {
       )}
 
       {activeSection === "feedback" && (() => {
-        const CUSTOMER_REVIEWS_DATA = [
-          { id: "r1", feature: "Startup Classifier", user: "Sarah Chen", role: "Founder", rating: 5, title: "Game changer for pitch prep", comment: "The AI classifier accurately identified our startup stage from a TechCrunch article.", sentiment: "positive" as const, date: "2025-03-10" },
-          { id: "r2", feature: "Startup Classifier", user: "Mike Rodriguez", role: "Investor", rating: 4, title: "Solid tool, needs PDF improvement", comment: "Works well with URLs. PDF parsing needs improvement for pitch decks.", sentiment: "neutral" as const, date: "2025-03-09" },
-          { id: "r3", feature: "Decoded X Return", user: "Anna Park", role: "Accelerator PM", rating: 5, title: "Best risk framework", comment: "M×P×T×F multiplicative framework is more realistic than additive models.", sentiment: "positive" as const, date: "2025-03-08" },
-          { id: "r4", feature: "Risk & PWMOIC", user: "James Liu", role: "Founder", rating: 3, title: "TAM needs more data", comment: "TAM computation feels limited. Need integration with market research databases.", sentiment: "negative" as const, date: "2025-03-07" },
-          { id: "r5", feature: "Risk & PWMOIC", user: "Lisa Wang", role: "Angel Investor", rating: 5, title: "Essential for portfolio", comment: "I use this to score every deal. Industry market caps save research time.", sentiment: "positive" as const, date: "2025-03-06" },
-          { id: "r6", feature: "Valuation Simulator", user: "Tom Baker", role: "Accelerator PM", rating: 4, title: "Great for cohort comparison", comment: "Side-by-side comparison with weighted parameters is exactly what we need.", sentiment: "positive" as const, date: "2025-03-05" },
-          { id: "r7", feature: "Valuation Simulator", user: "David Lim", role: "Banking Analyst", rating: 2, title: "Needs enterprise features", comment: "Lacks audit trails, role-based access, export to internal format, and API.", sentiment: "negative" as const, date: "2025-03-04" },
-          { id: "r8", feature: "Decoded X Return", user: "Priya Sharma", role: "Founder", rating: 4, title: "Intuitive visualization", comment: "Stage flow makes complex calculations intuitive for non-finance co-founders.", sentiment: "positive" as const, date: "2025-03-03" },
-          { id: "r9", feature: "Startup Classifier", user: "Chen Wei", role: "VC Analyst", rating: 3, title: "Accuracy varies", comment: "Classification accuracy varies significantly. Needs more training data.", sentiment: "negative" as const, date: "2025-03-02" },
-          { id: "r10", feature: "Risk & PWMOIC", user: "Maria Santos", role: "Consultant", rating: 4, title: "Excellent methodology", comment: "PWMOIC scoring is well-calibrated. Score reference guide is very helpful.", sentiment: "positive" as const, date: "2025-03-01" },
+        const FEATURE_ID_TO_NAME: Record<string, string> = { classifier: "Startup Classifier", decoded: "Decoded X Return", risk: "Risk & PWMOIC", valuation: "Valuation Simulator" };
+        const SEED_PM_REVIEWS = [
+          { id: "r1", feature: "Startup Classifier", user: "Sarah Chen", role: "Founder", rating: 5, title: "Game changer for pitch prep", comment: "The AI classifier accurately identified our startup stage from a TechCrunch article.", sentiment: "positive" as const, date: "2025-03-10T14:30:00Z" },
+          { id: "r2", feature: "Startup Classifier", user: "Mike Rodriguez", role: "Investor", rating: 4, title: "Solid tool, needs PDF improvement", comment: "Works well with URLs. PDF parsing needs improvement for pitch decks.", sentiment: "neutral" as const, date: "2025-03-09T09:15:00Z" },
+          { id: "r3", feature: "Decoded X Return", user: "Anna Park", role: "Accelerator PM", rating: 5, title: "Best risk framework", comment: "M×P×T×F multiplicative framework is more realistic than additive models.", sentiment: "positive" as const, date: "2025-03-08T16:45:00Z" },
+          { id: "r4", feature: "Risk & PWMOIC", user: "James Liu", role: "Founder", rating: 3, title: "TAM needs more data", comment: "TAM computation feels limited. Need integration with market research databases.", sentiment: "negative" as const, date: "2025-03-07T11:20:00Z" },
+          { id: "r5", feature: "Risk & PWMOIC", user: "Lisa Wang", role: "Angel Investor", rating: 5, title: "Essential for portfolio", comment: "I use this to score every deal. Industry market caps save research time.", sentiment: "positive" as const, date: "2025-03-06T13:00:00Z" },
+          { id: "r6", feature: "Valuation Simulator", user: "Tom Baker", role: "Accelerator PM", rating: 4, title: "Great for cohort comparison", comment: "Side-by-side comparison with weighted parameters is exactly what we need.", sentiment: "positive" as const, date: "2025-03-05T10:30:00Z" },
+          { id: "r7", feature: "Valuation Simulator", user: "David Lim", role: "Banking Analyst", rating: 2, title: "Needs enterprise features", comment: "Lacks audit trails, role-based access, export to internal format, and API.", sentiment: "negative" as const, date: "2025-03-04T08:45:00Z" },
+          { id: "r8", feature: "Decoded X Return", user: "Priya Sharma", role: "Founder", rating: 4, title: "Intuitive visualization", comment: "Stage flow makes complex calculations intuitive for non-finance co-founders.", sentiment: "positive" as const, date: "2025-03-03T15:20:00Z" },
         ];
+        const liveReviews = customerReviews.map((r) => ({
+          id: r.id, feature: FEATURE_ID_TO_NAME[r.featureId] || r.featureId, user: r.userName, role: r.userRole,
+          rating: r.rating, title: r.title, comment: r.comment, sentiment: r.sentiment, date: r.createdAt,
+        }));
+        const CUSTOMER_REVIEWS_DATA = [...liveReviews, ...SEED_PM_REVIEWS].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         const SENTIMENT_CONFIG = {
           positive: { color: "#10B981", bg: "bg-emerald-500/10", border: "border-emerald-500/20", icon: "👍", label: "Positive" },
           neutral: { color: "#F59E0B", bg: "bg-amber-500/10", border: "border-amber-500/20", icon: "😐", label: "Neutral" },
@@ -264,7 +268,7 @@ export default function PMDashboard() {
                           {cfg.icon} {cfg.label}
                         </Badge>
                         <span className="text-[8px] text-slate-600">{rev.feature}</span>
-                        <span className="text-[8px] text-slate-700 ml-auto">{rev.date}</span>
+                        <span className="text-[8px] text-slate-700 ml-auto">{new Date(rev.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
                       </div>
                     </div>
                   </div>
