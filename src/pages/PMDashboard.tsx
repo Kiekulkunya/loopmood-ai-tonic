@@ -690,8 +690,7 @@ export default function PMDashboard() {
           </Card>
         </div>
       )}
-
-
+      {activeSection === "b2b" && (
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
             <KPI icon={Building2} label="Pipeline Value" value={`$${B2B_PIPELINE.reduce((a, b) => a + b.value, 0).toLocaleString()}`} color="#8B5CF6" />
