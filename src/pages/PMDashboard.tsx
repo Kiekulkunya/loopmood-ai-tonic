@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer,
   LineChart, Line, CartesianGrid, Legend, PieChart, Pie, AreaChart, Area,
-  RadarChart, PolarGrid, PolarAngleAxis, Radar, ComposedChart,
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ComposedChart,
 } from "recharts";
 import {
   Users, TrendingUp, DollarSign, Target, Shield, Zap,
@@ -12,6 +12,7 @@ import {
   MessageSquare, Star, ThumbsUp, ThumbsDown, Lightbulb,
   Sparkles, Heart, TrendingDown, Filter,
   Brain, ShieldAlert,
+  ShieldCheck, Eye, Leaf, ArrowRight,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +53,97 @@ const FEEDBACK_RESPONSES = [
 ];
 const FEATURE_MAP: Record<string, { label: string; emoji: string; color: string }> = { classifier: { label: "Startup Classifier", emoji: "🔬", color: "#3B82F6" }, decoded: { label: "Decoded X Return", emoji: "📈", color: "#06B6D4" }, risk: { label: "Risk & PWMOIC", emoji: "⚡", color: "#10B981" }, valuation: { label: "Valuation Simulator", emoji: "🎯", color: "#F59E0B" }, nova: { label: "Nova Dashboard", emoji: "📊", color: "#A855F7" }, chatbot: { label: "Ask LoopAI", emoji: "💬", color: "#EC4899" } };
 const SATISFACTION_TREND = [{ month: "Sep", avg: 3.2, responses: 8 },{ month: "Oct", avg: 3.6, responses: 15 },{ month: "Nov", avg: 3.9, responses: 28 },{ month: "Dec", avg: 4.1, responses: 42 },{ month: "Jan", avg: 4.3, responses: 65 },{ month: "Feb", avg: 4.2, responses: 12 }];
+
+const SUCCESS_METRICS = {
+  userCentric: [
+    { id: "completion", name: "Report Completion Rate", target: 60, current: 62, unit: "%", desc: "% of form-starts that reach completion", trend: [48, 52, 55, 58, 60, 62] },
+    { id: "nps", name: "Net Promoter Score (NPS)", target: 45, current: 42, unit: "", desc: "B2C user satisfaction score", trend: [38, 41, 43, 44, 46, 42] },
+    { id: "returnRate", name: "Return Usage Rate", target: 40, current: 35, unit: "%", desc: "Paid users generating >1 report in 6mo", trend: [18, 22, 26, 30, 33, 35] },
+  ],
+  business: [
+    { id: "mrrGrowth", name: "MRR Growth (MoM)", target: 12, current: 37, unit: "%", desc: "Monthly recurring revenue growth rate", trend: [45, 38, 35, 30, 28, 37] },
+    { id: "b2bContracts", name: "B2B Contracts (Quarterly)", target: 2, current: 2, unit: "", desc: "Enterprise contracts signed per quarter", trend: [0, 0, 1, 1, 2, 2] },
+    { id: "ltvCac", name: "LTV:CAC Ratio", target: 3, current: 2.4, unit: "x", desc: "Lifetime value vs customer acquisition cost", trend: [1.2, 1.5, 1.8, 2.0, 2.2, 2.4] },
+  ],
+  technical: [
+    { id: "reportTime", name: "Report Generation Time (p95)", target: 30, current: 18, unit: "s", desc: "95th percentile generation latency", trend: [42, 35, 28, 22, 20, 18], inverse: true },
+    { id: "uptime", name: "Platform Uptime", target: 99.9, current: 99.93, unit: "%", desc: "Rolling 30-day availability", trend: [99.5, 99.7, 99.8, 99.85, 99.9, 99.93] },
+    { id: "aiAccuracy", name: "AI Scoring Accuracy", target: 90, current: 86, unit: "%", desc: "Within 10% of real-world outcomes", trend: [72, 78, 82, 84, 85, 86] },
+  ],
+};
+
+const TRACKING_EVENTS = [
+  { event: "Form Started", count: 3500, target: 5000, icon: "📝" },
+  { event: "Form Completed", count: 2170, target: 3000, icon: "✅" },
+  { event: "Report Generated", count: 2100, target: 3000, icon: "📊" },
+  { event: "Report Downloaded", count: 1260, target: 2000, icon: "📥" },
+  { event: "Upgrade Clicked", count: 420, target: 800, icon: "⬆️" },
+  { event: "B2B Invite Sent", count: 35, target: 100, icon: "📨" },
+];
+
+const TRUST_PILLARS = [
+  {
+    id: "tried", name: "Tried-and-True", abbr: "T", color: "#3B82F6", icon: ShieldCheck, score: 82, target: 90,
+    desc: "Proven methodologies and validated frameworks",
+    metrics: [
+      { name: "PWMOIC Framework Validation", score: 90, detail: "Peer-reviewed by Dr. Kie Prayarach, tested on 200+ startups" },
+      { name: "Scoring Model Backtesting", score: 78, detail: "Backtested against 150 historical startup outcomes" },
+      { name: "Industry Standard Compliance", score: 85, detail: "Aligned with VC due diligence best practices" },
+      { name: "Methodology Documentation", score: 75, detail: "Complete methodology whitepaper and glossary available" },
+    ],
+    improvements: ["Expand backtesting dataset to 500+ startups", "Publish methodology peer-review paper", "Add industry-specific calibration"],
+  },
+  {
+    id: "reinforced", name: "Reinforced", abbr: "R", color: "#8B5CF6", icon: Shield, score: 75, target: 85,
+    desc: "Robust security, data protection, and system reliability",
+    metrics: [
+      { name: "Data Encryption (Rest + Transit)", score: 95, detail: "AES-256 at rest, TLS 1.3 in transit via Supabase" },
+      { name: "Access Control (RLS)", score: 88, detail: "Row-Level Security on all user data tables" },
+      { name: "API Key Security", score: 70, detail: "In-memory only, but lacks key rotation and vault" },
+      { name: "Audit Trail Coverage", score: 48, detail: "Basic activity logs, lacks full audit trail for compliance" },
+    ],
+    improvements: ["Implement key vault (AWS KMS or Supabase Vault)", "Full audit trail for SOC 2 readiness", "Add MFA authentication option"],
+  },
+  {
+    id: "user", name: "User-Centered", abbr: "U", color: "#10B981", icon: Heart, score: 78, target: 85,
+    desc: "Designed for real user needs with continuous feedback loops",
+    metrics: [
+      { name: "User Satisfaction (CSAT)", score: 84, detail: "4.2/5 average from feedback surveys" },
+      { name: "Feature Adoption Rate", score: 72, detail: "65% of users engage with 3+ features" },
+      { name: "Accessibility (WCAG)", score: 62, detail: "Partial WCAG 2.1 AA — keyboard nav works, ARIA labels incomplete" },
+      { name: "Onboarding Completion", score: 88, detail: "88% complete API setup within first session" },
+    ],
+    improvements: ["Complete WCAG 2.1 AA audit", "Add guided onboarding tour", "Implement progressive disclosure for complex features"],
+  },
+  {
+    id: "sustainable", name: "Sustainable", abbr: "S", color: "#F59E0B", icon: Leaf, score: 70, target: 80,
+    desc: "Long-term viability, scalability, and responsible growth",
+    metrics: [
+      { name: "Revenue Sustainability (LTV:CAC)", score: 72, detail: "2.4x ratio — approaching 3x target" },
+      { name: "Technical Scalability", score: 68, detail: "Supports 500 concurrent users, batch processing needs work" },
+      { name: "Knowledge Transfer", score: 65, detail: "Documentation exists but lacks contributor onboarding guide" },
+      { name: "Environmental Impact", score: 75, detail: "Serverless architecture, minimal compute footprint" },
+    ],
+    improvements: ["Optimize batch processing for B2B scale", "Create comprehensive developer docs", "Implement carbon-aware scheduling"],
+  },
+  {
+    id: "transparent", name: "Transparent", abbr: "T", color: "#EF4444", icon: Eye, score: 73, target: 85,
+    desc: "Open, explainable AI decisions and clear data practices",
+    metrics: [
+      { name: "AI Explainability", score: 68, detail: "Scoring explanations exist but lack granular factor attribution" },
+      { name: "Data Usage Transparency", score: 78, detail: "Privacy policy covers data handling, GDPR/PDPA compliant" },
+      { name: "Pricing Transparency", score: 85, detail: "Clear freemium model with no hidden fees" },
+      { name: "Open Methodology", score: 62, detail: "PWMOIC glossary embedded, full methodology PDF planned" },
+    ],
+    improvements: ["Add per-dimension factor attribution in reports", "Publish model cards for AI scoring", "Create interactive PWMOIC methodology explorer"],
+  },
+];
+
+const TRUST_RADAR_DATA = TRUST_PILLARS.map((p) => ({
+  pillar: p.abbr + " - " + p.name.split(" ")[0],
+  current: p.score,
+  target: p.target,
+}));
 
 const TT = { contentStyle: { backgroundColor: "#0F172A", border: "1px solid #1E293B", borderRadius: 10, fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" } };
 
@@ -98,6 +190,7 @@ export default function PMDashboard() {
     { id: "feedback", label: "Feedback & Insights", icon: MessageSquare },
     { id: "growth", label: "Growth & Revenue", icon: TrendingUp },
     { id: "funnel", label: "User Funnel", icon: Target },
+    { id: "metrics", label: "Success Metrics", icon: ShieldCheck },
     { id: "b2b", label: "B2B Pipeline", icon: Building2 },
     { id: "roadmap", label: "Roadmap", icon: Rocket },
     { id: "competitive", label: "Competitive", icon: Crown },
@@ -368,6 +461,235 @@ export default function PMDashboard() {
         })}</div></ChartCard>
       )}
 
+      {activeSection === "metrics" && (
+        <div className="space-y-4">
+          <Card className="bg-[#111827] border-[#1E293B] overflow-hidden">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-600/15 border border-blue-600/25 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-blue-400" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-white">PRD Success Metrics & TRUST Framework</h2>
+                  <p className="text-[9px] text-slate-500 mt-0.5">Gap analysis against ChatPRD targets · Ethical AI governance via TRUST pillars</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: "Metrics On Track", value: [...SUCCESS_METRICS.userCentric, ...SUCCESS_METRICS.business, ...SUCCESS_METRICS.technical].filter((m: any) => m.inverse ? m.current <= m.target : m.current >= m.target).length, total: 9, color: "#10B981" },
+              { label: "Needs Attention", value: [...SUCCESS_METRICS.userCentric, ...SUCCESS_METRICS.business, ...SUCCESS_METRICS.technical].filter((m: any) => { const pct = m.inverse ? (m.target / m.current) * 100 : (m.current / m.target) * 100; return pct >= 70 && pct < 100; }).length, total: 9, color: "#F59E0B" },
+              { label: "Critical Gap", value: [...SUCCESS_METRICS.userCentric, ...SUCCESS_METRICS.business, ...SUCCESS_METRICS.technical].filter((m: any) => { const pct = m.inverse ? (m.target / m.current) * 100 : (m.current / m.target) * 100; return pct < 70; }).length, total: 9, color: "#EF4444" },
+            ].map((s, i) => (
+              <Card key={i} className="bg-[#111827] border-[#1E293B]">
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl font-black" style={{ color: s.color }}>{s.value}/{s.total}</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">{s.label}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {[
+            { title: "👤 User-Centric Metrics", data: SUCCESS_METRICS.userCentric, color: "#06B6D4" },
+            { title: "💰 Business Metrics", data: SUCCESS_METRICS.business, color: "#10B981" },
+            { title: "⚙️ Technical Metrics", data: SUCCESS_METRICS.technical, color: "#8B5CF6" },
+          ].map((cat) => (
+            <ChartCard key={cat.title} title={cat.title} subtitle="Current vs PRD target — gap analysis">
+              <div className="space-y-4">
+                {cat.data.map((m: any) => {
+                  const pct = m.inverse
+                    ? Math.min((m.target / m.current) * 100, 100)
+                    : Math.min((m.current / m.target) * 100, 100);
+                  const isOnTrack = pct >= 100;
+                  const isClose = pct >= 80;
+                  const statusColor = isOnTrack ? "#10B981" : isClose ? "#F59E0B" : "#EF4444";
+                  const gap = m.inverse ? m.current - m.target : m.target - m.current;
+                  return (
+                    <div key={m.id} className="flex items-start gap-4">
+                      <div className="w-[200px] shrink-0">
+                        <div className="text-xs font-bold text-white">{m.name}</div>
+                        <div className="text-[8px] text-slate-500 mt-0.5">{m.desc}</div>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-black text-white">{m.current}{m.unit}</span>
+                            <ArrowRight className="w-3 h-3 text-slate-600" />
+                            <span className="text-[10px] text-slate-400">Target: {m.target}{m.unit}</span>
+                          </div>
+                          <Badge className="text-[7px] px-1.5" style={{ backgroundColor: statusColor + "15", color: statusColor }}>
+                            {isOnTrack ? "✓ On Track" : isClose ? `Gap: ${Math.abs(gap).toFixed(1)}${m.unit}` : `⚠ Gap: ${Math.abs(gap).toFixed(1)}${m.unit}`}
+                          </Badge>
+                        </div>
+                        <div className="relative w-full h-3 bg-[#1E293B] rounded-full overflow-hidden">
+                          <div className="absolute h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: statusColor }} />
+                          <div className="absolute top-0 bottom-0 w-0.5 bg-white/30" style={{ left: "100%" }} />
+                        </div>
+                        <div className="flex items-end gap-0.5 mt-1.5 h-4">
+                          {m.trend.map((v: number, i: number) => {
+                            const max = Math.max(...m.trend);
+                            const h = max > 0 ? (v / max) * 100 : 0;
+                            return <div key={i} className="flex-1 rounded-sm transition-all" style={{ height: `${h}%`, backgroundColor: i === m.trend.length - 1 ? statusColor : statusColor + "33" }} />;
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </ChartCard>
+          ))}
+
+          <ChartCard title="📋 PRD Tracking Plan" subtitle="Event-based funnel tracking — current vs target">
+            <div className="grid grid-cols-6 gap-2">
+              {TRACKING_EVENTS.map((evt) => {
+                const pct = Math.min((evt.count / evt.target) * 100, 100);
+                const color = pct >= 80 ? "#10B981" : pct >= 50 ? "#F59E0B" : "#EF4444";
+                return (
+                  <div key={evt.event} className="text-center p-3 rounded-xl bg-[#0B0F19] border border-[#1E293B]">
+                    <div className="text-xl mb-1">{evt.icon}</div>
+                    <div className="text-lg font-black text-white">{evt.count.toLocaleString()}</div>
+                    <div className="text-[8px] text-slate-500">{evt.event}</div>
+                    <div className="w-full h-1.5 bg-[#1E293B] rounded-full mt-2 overflow-hidden">
+                      <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
+                    </div>
+                    <div className="text-[7px] mt-1" style={{ color }}>{pct.toFixed(0)}% of {evt.target.toLocaleString()}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </ChartCard>
+
+          <Card className="bg-[#111827] border-[#1E293B] overflow-hidden">
+            <div className="px-5 py-3 border-b border-[#1E293B] bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-emerald-500/5">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-blue-400" />
+                <div>
+                  <h3 className="text-sm font-bold text-white">TRUST Framework for Responsible Innovation</h3>
+                  <p className="text-[9px] text-slate-500">Tried-and-True · Reinforced · User-Centered · Sustainable · Transparent</p>
+                </div>
+              </div>
+            </div>
+            <CardContent className="p-5">
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-300 mb-3">TRUST Radar — Current vs Target</h4>
+                  <ResponsiveContainer width="100%" height={280}>
+                    <RadarChart data={TRUST_RADAR_DATA}>
+                      <PolarGrid stroke="#1E293B" />
+                      <PolarAngleAxis dataKey="pillar" tick={{ fill: "#94A3B8", fontSize: 9 }} />
+                      <PolarRadiusAxis domain={[0, 100]} tick={{ fill: "#475569", fontSize: 8 }} />
+                      <Radar name="Current" dataKey="current" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.15} strokeWidth={2.5} dot={{ r: 3, fill: "#3B82F6" }} />
+                      <Radar name="Target" dataKey="target" stroke="#EF4444" fill="transparent" strokeDasharray="5 5" strokeWidth={1.5} dot={{ r: 2, fill: "#EF4444" }} />
+                      <Legend wrapperStyle={{ fontSize: 10 }} />
+                      <Tooltip {...TT} />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-300 mb-3">Overall TRUST Score</h4>
+                  <div className="text-center py-4">
+                    <div className="text-5xl font-black text-blue-400">
+                      {Math.round(TRUST_PILLARS.reduce((a, b) => a + b.score, 0) / TRUST_PILLARS.length)}
+                    </div>
+                    <div className="text-xs text-slate-400 mt-1">out of 100</div>
+                    <div className="text-[9px] text-slate-500 mt-0.5">
+                      Target: {Math.round(TRUST_PILLARS.reduce((a, b) => a + b.target, 0) / TRUST_PILLARS.length)}
+                    </div>
+                  </div>
+                  <div className="flex justify-center gap-2 mt-4">
+                    {TRUST_PILLARS.map((p) => {
+                      const gap = p.target - p.score;
+                      return (
+                        <div key={p.id} className="text-center">
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-1.5 transition-all" style={{ backgroundColor: p.color + "15", border: `1px solid ${p.color}33` }}>
+                            <span className="text-lg font-black" style={{ color: p.color }}>{p.abbr}</span>
+                          </div>
+                          <div className="text-xs font-bold" style={{ color: p.color }}>{p.score}</div>
+                          <div className="text-[7px] text-slate-500">{gap > 0 ? `−${gap}` : "✓"}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {TRUST_PILLARS.map((pillar) => {
+                  const Icon = pillar.icon;
+                  const gap = pillar.target - pillar.score;
+                  const pct = (pillar.score / pillar.target) * 100;
+                  return (
+                    <div key={pillar.id} className="rounded-xl border p-4" style={{ borderColor: pillar.color + "22", backgroundColor: pillar.color + "04" }}>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: pillar.color + "20" }}>
+                            <Icon className="w-4 h-4" style={{ color: pillar.color }} />
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold" style={{ color: pillar.color }}>{pillar.name}</div>
+                            <div className="text-[8px] text-slate-500">{pillar.desc}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-black" style={{ color: pillar.color }}>{pillar.score}<span className="text-xs text-slate-500">/{pillar.target}</span></div>
+                          <Badge className="text-[7px]" style={{ backgroundColor: (gap > 10 ? "#EF4444" : gap > 0 ? "#F59E0B" : "#10B981") + "15", color: gap > 10 ? "#EF4444" : gap > 0 ? "#F59E0B" : "#10B981" }}>
+                            {gap > 0 ? `Gap: ${gap} pts` : "✓ Target Met"}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mb-3">
+                        {pillar.metrics.map((m) => {
+                          const mColor = m.score >= 85 ? "#10B981" : m.score >= 70 ? "#F59E0B" : "#EF4444";
+                          return (
+                            <div key={m.name} className="flex items-center gap-2 py-1.5 px-2.5 rounded-lg bg-[#0B0F19] border border-[#1E293B]/50">
+                              <div className="w-7 h-7 rounded flex items-center justify-center text-[10px] font-black shrink-0" style={{ backgroundColor: mColor + "15", color: mColor }}>
+                                {m.score}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-[9px] font-semibold text-white truncate">{m.name}</div>
+                                <div className="text-[7px] text-slate-500 truncate">{m.detail}</div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="pt-2 border-t" style={{ borderColor: pillar.color + "15" }}>
+                        <div className="text-[8px] font-bold mb-1.5" style={{ color: pillar.color }}>🔧 Improvement Priorities:</div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {pillar.improvements.map((imp, i) => (
+                            <span key={i} className="text-[8px] px-2 py-0.5 rounded-full border" style={{ borderColor: pillar.color + "22", color: pillar.color + "CC", backgroundColor: pillar.color + "08" }}>
+                              {imp}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-emerald-500/5 border border-[#1E293B]">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
+                  <div>
+                    <div className="text-xs font-bold text-white mb-1">AI Governance Summary</div>
+                    <p className="text-[9px] text-slate-400 leading-relaxed">
+                      Overall TRUST score is <strong className="text-blue-400">{Math.round(TRUST_PILLARS.reduce((a, b) => a + b.score, 0) / TRUST_PILLARS.length)}/100</strong> against a target of {Math.round(TRUST_PILLARS.reduce((a, b) => a + b.target, 0) / TRUST_PILLARS.length)}.
+                      <strong className="text-amber-400"> Reinforced</strong> (security) and <strong className="text-red-400">Transparent</strong> (explainability) are the two pillars with the largest gaps.
+                      Priority actions: (1) Implement full audit trails for B2B compliance, (2) Add AI explainability with per-dimension factor attribution, (3) Complete WCAG 2.1 AA accessibility audit.
+                      These improvements directly support Phase 3 B2B enterprise requirements and responsible AI governance commitments.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
       {activeSection === "b2b" && (
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
