@@ -81,7 +81,6 @@ export default function ValuationSimulator() {
   const handleSurveyComplete = (result: import("@/components/FeedbackSurvey").SurveyResult) => {
     addFeedback(result);
     // Also create a CustomerReview so it appears in Customer Feedback page
-    const { addCustomerReview } = useAppRef.current;
     const review: import("@/contexts/AppContext").CustomerReview = {
       id: crypto.randomUUID(),
       featureId: "valuation",
