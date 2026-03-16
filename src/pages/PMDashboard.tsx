@@ -162,6 +162,10 @@ function ChartCard({ title, subtitle, children, className = "" }: { title: strin
 export default function PMDashboard() {
   const { logs, customerReviews } = useApp();
   const [activeSection, setActiveSection] = useState("overview");
+  const [aiReportGenerated, setAiReportGenerated] = useState(false);
+  const [aiReportConfirmed, setAiReportConfirmed] = useState(false);
+  const [generatingReport, setGeneratingReport] = useState(false);
+  const metricsRef = useRef<HTMLDivElement>(null);
   const latest = MONTHLY_DATA[MONTHLY_DATA.length - 1];
   const prev = MONTHLY_DATA[MONTHLY_DATA.length - 2];
 
@@ -462,10 +466,6 @@ export default function PMDashboard() {
       )}
 
       {activeSection === "metrics" && (() => {
-        const [aiReportGenerated, setAiReportGenerated] = React.useState(false);
-        const [aiReportConfirmed, setAiReportConfirmed] = React.useState(false);
-        const [generatingReport, setGeneratingReport] = React.useState(false);
-        const metricsRef = React.useRef<HTMLDivElement>(null);
 
         const allMetrics = [...SUCCESS_METRICS.userCentric, ...SUCCESS_METRICS.business, ...SUCCESS_METRICS.technical];
         const onTrack = allMetrics.filter((m: any) => m.inverse ? m.current <= m.target : m.current >= m.target).length;
