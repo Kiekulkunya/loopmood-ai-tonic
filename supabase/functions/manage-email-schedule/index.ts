@@ -16,9 +16,14 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    // Use the actual JWT anon key for cron HTTP calls
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || Deno.env.get('SUPABASE_PUBLISHABLE_KEY') || '';
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    // Log keys for debugging (first 20 chars only)
+    console.log(`[manage-email-schedule] Using URL: ${supabaseUrl}`);
+    console.log(`[manage-email-schedule] Anon key starts with: ${anonKey.substring(0, 20)}...`);
 
     const body = await req.json();
     const { action } = body;
