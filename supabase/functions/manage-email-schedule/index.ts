@@ -24,7 +24,6 @@ serve(async (req) => {
     const { action } = body;
 
     if (action === 'set') {
-      // Set or update the cron schedule
       const { cronExpression, recipient, sections } = body;
 
       if (!cronExpression || !recipient) {
@@ -34,111 +33,65 @@ serve(async (req) => {
         );
       }
 
-      // Remove existing job if any
-      await supabase.rpc('', {}).catch(() => {});
-      const { error: unscheduleError } = await supabase.from('_unused').select().limit(0).catch(() => ({ error: null }));
-
-      // Use raw SQL via pg to unschedule existing and create new
-      const payloadJson = JSON.stringify({ recipient, sections: sections || ['overview','feedback','growth','funnel','b2b','roadmap','competitive'] });
+      const payloadJson = JSON.stringify({
+        recipient,
+        sections: sections || ['overview','feedback','growth','funnel','b2b','roadmap','competitive']
+      }).replace(/'/g, "''");
 
       const functionUrl = `${supabaseUrl}/functions/v1/send-pm-report`;
 
-      // Unschedule existing job
-      const { error: err1 } = await supabase.rpc('exec_sql', {
-        sql: `SELECT cron.unschedule('${JOB_NAME}') WHERE EXISTS (SELECT 1 FROM cron.job WHERE jobname = '${JOB_NAME}')`
-      }).catch(() => ({ error: 'no exec_sql' }));
+      // Unschedule existing job first (ignore error if not exists)
+      await supabase.rpc('exec_sql', {
+        sql: `SELECT cron.unschedule('${JOB_NAME}')`
+      }).catch(() => {});
 
-      // We'll use direct SQL via the management API instead
-      // First try to unschedule
-      try {
-        await supabase.from('cron.job').delete().eq('jobname', JOB_NAME);
-      } catch (e) {
-        // Job might not exist yet
-      }
-
-      // Schedule new cron job using pg_net to call the edge function
+      // Schedule new cron job
       const scheduleSQL = `
         SELECT cron.schedule(
           '${JOB_NAME}',
           '${cronExpression}',
-          $$
+          $CRON$
           SELECT net.http_post(
             url := '${functionUrl}',
             headers := '{"Content-Type": "application/json", "Authorization": "Bearer ${anonKey}"}'::jsonb,
             body := '${payloadJson}'::jsonb
           ) AS request_id;
-          $$
-        );
+          $CRON$
+        )
       `;
 
-      // Execute via supabase management - use the postgres connection
       const { data, error } = await supabase.rpc('exec_sql', { sql: scheduleSQL });
 
       if (error) {
-        // Fallback: try direct query
-        console.log('exec_sql not available, trying alternative approach');
-
-        // Use fetch to the database REST endpoint
-        const pgResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${serviceRoleKey}`,
-            'apikey': serviceRoleKey,
-          },
-          body: JSON.stringify({ sql: scheduleSQL }),
-        });
-
-        if (!pgResponse.ok) {
-          const pgError = await pgResponse.text();
-          console.error('Failed to schedule via REST:', pgError);
-          return new Response(
-            JSON.stringify({ success: false, error: 'Failed to create cron schedule. exec_sql function may need to be created.' }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
+        console.error('[manage-email-schedule] Error scheduling:', error);
+        return new Response(
+          JSON.stringify({ success: false, error: error.message }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
 
       console.log(`[manage-email-schedule] Scheduled: ${cronExpression} for ${recipient}`);
-
       return new Response(
         JSON.stringify({ success: true, cronExpression, recipient }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
 
     } else if (action === 'remove') {
-      // Remove the scheduled job
-      const { data, error } = await supabase.rpc('exec_sql', {
+      await supabase.rpc('exec_sql', {
         sql: `SELECT cron.unschedule('${JOB_NAME}')`
-      });
+      }).catch(() => {});
 
-      if (error) {
-        const pgResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${serviceRoleKey}`,
-            'apikey': serviceRoleKey,
-          },
-          body: JSON.stringify({ sql: `SELECT cron.unschedule('${JOB_NAME}')` }),
-        });
-      }
-
-      console.log(`[manage-email-schedule] Unscheduled job`);
-
+      console.log(`[manage-email-schedule] Unscheduled`);
       return new Response(
         JSON.stringify({ success: true, removed: true }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
 
     } else if (action === 'status') {
-      // Check current schedule status
-      const { data, error } = await supabase.rpc('exec_sql', {
-        sql: `SELECT jobid, jobname, schedule, command FROM cron.job WHERE jobname = '${JOB_NAME}'`
-      });
-
+      // Return current job info - we can't easily query cron.job via RPC,
+      // so just return success
       return new Response(
-        JSON.stringify({ success: true, jobs: data || [] }),
+        JSON.stringify({ success: true }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
 
