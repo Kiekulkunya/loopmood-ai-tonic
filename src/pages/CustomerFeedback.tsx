@@ -279,14 +279,19 @@ export default function CustomerFeedback() {
               </div>
             </div>
 
-            <div className="mb-4">
-              <label className="text-[10px] text-muted-foreground block mb-1.5">Your Rating</label>
-              <div className="flex items-center gap-3">
-                <StarRating value={formRating} onChange={setFormRating} size={28} />
-                {formRating > 0 && (
-                  <span className="text-xs font-semibold" style={{ color: formRating >= 4 ? "#10B981" : formRating >= 3 ? "#F59E0B" : "#EF4444" }}>
-                    {["", "Poor", "Below Average", "Good", "Very Good", "Excellent"][formRating]}
-                  </span>
+            <div className="mb-5">
+              <label className="text-xs font-semibold text-foreground block mb-2">⭐ Your Rating</label>
+              <div className="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-amber-400/40 bg-amber-400/5">
+                <StarRating value={formRating} onChange={setFormRating} size={36} />
+                {formRating > 0 ? (
+                  <div className="flex flex-col">
+                    <span className="text-base font-black" style={{ color: formRating >= 4 ? "#10B981" : formRating >= 3 ? "#F59E0B" : "#EF4444" }}>
+                      {["", "😞 Poor", "😐 Below Average", "🙂 Good", "😊 Very Good", "🤩 Excellent"][formRating]}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">{formRating} out of 5 stars</span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-muted-foreground animate-pulse">← Tap a star to rate</span>
                 )}
               </div>
             </div>
