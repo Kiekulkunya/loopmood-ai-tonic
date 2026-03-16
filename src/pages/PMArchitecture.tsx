@@ -161,7 +161,11 @@ const INTERACTIVE_HTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0B0F19">
 <title>LoopAI Core Architecture</title>
 <style>
 /* ═══ Reset & Base ═══ */
@@ -260,12 +264,67 @@ a{color:inherit;text-decoration:none}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;display:none}
 .overlay.open{display:block}
 
-/* ═══ Responsive ═══ */
+/* ═══ Responsive — Tablet ═══ */
 @media(max-width:900px){
+  .container{padding:12px}
   .arch-canvas{min-height:auto;position:static}
   .node{position:static!important;width:100%!important;margin-bottom:8px}
   .arrows-svg{display:none}
-  .services-bar{flex-direction:column;align-items:flex-start}
+  .layer-label{display:none}
+  .services-bar{flex-direction:row;flex-wrap:wrap;gap:6px;padding:12px}
+  .header h1{font-size:18px}
+  .header-actions{flex-wrap:wrap}
+  .legend{flex-wrap:wrap;gap:6px;padding:10px}
+  .info-panel{width:320px;right:-320px}
+  .info-panel.open{right:0}
+}
+
+/* ═══ Responsive — Mobile (< 600px) ═══ */
+@media(max-width:600px){
+  .container{padding:8px}
+  .header{flex-direction:column;align-items:flex-start;gap:8px}
+  .header h1{font-size:16px;gap:6px}
+  .header h1 svg{width:20px;height:20px}
+  .header .sub{font-size:9px}
+  .header-actions{width:100%;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+  .btn{padding:8px 10px;font-size:11px;text-align:center;min-height:40px;display:flex;align-items:center;justify-content:center}
+  .services-bar{padding:10px;gap:6px;border-radius:10px}
+  .services-bar .label{width:100%;margin-bottom:2px;font-size:8px}
+  .service-pill{padding:8px 12px;font-size:11px;border-radius:16px;flex:0 0 auto;min-height:36px}
+  .service-pill .dot{width:6px;height:6px}
+  .node{border-radius:10px;padding:12px;margin-bottom:6px;min-height:48px}
+  .node .node-header{gap:8px}
+  .node .node-icon{width:36px;height:36px;font-size:16px}
+  .node .node-title{font-size:12px}
+  .node .node-sub{font-size:9px}
+  .node .node-badge{font-size:7px;padding:2px 6px}
+  .arrows-svg{display:none}
+  .layer-label{display:none}
+  .legend{gap:4px;padding:8px;border-radius:8px}
+  .legend-item{padding:6px 8px;font-size:9px}
+  .legend-item .leg-dot{width:8px;height:8px}
+  /* Mobile: info panel as bottom sheet */
+  .info-panel{right:0!important;left:0;bottom:-100vh;top:auto;width:100%;height:75vh;border-radius:16px 16px 0 0;border-left:none;border-top:1px solid var(--border);transition:bottom .4s cubic-bezier(.16,1,.3,1)}
+  .info-panel.open{bottom:0;right:0!important}
+  .info-panel .close-btn{top:8px;right:8px}
+  .info-panel h2{font-size:15px}
+  .overlay.open{display:block}
+  /* Tech stack grid → single column */
+  div[style*="grid-template-columns:1fr 1fr 1fr"]{grid-template-columns:1fr!important}
+  .footer{font-size:8px;padding:14px 8px}
+}
+
+/* ═══ Touch-friendly ═══ */
+@media(hover:none) and (pointer:coarse){
+  .node{padding:14px;min-height:52px}
+  .node:hover{transform:none}
+  .service-pill{min-height:40px;padding:10px 14px}
+  .service-pill:hover{transform:none;box-shadow:none}
+  .btn{min-height:42px}
+  .legend-item{min-height:32px}
+  .close-btn,.info-panel .close-btn,.info-panel .cb{width:36px;height:36px;font-size:18px}
+  .conn-badge{padding:6px 10px;font-size:10px}
+  .tech-tag{padding:4px 8px;font-size:9px}
 }
 
 /* ═══ Animations ═══ */
@@ -286,7 +345,7 @@ a{color:inherit;text-decoration:none}
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m7.08 7.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m7.08-7.08l4.24-4.24"/></svg>
         LoopAI Core Architecture
       </h1>
-      <div class="sub">23 components · 30 data flows · Full-stack system diagram · TECH 41 Stanford</div>
+      <div class="sub">22 components · 40 data flows · Full-stack system diagram · TECH 41 Stanford</div>
     </div>
     <div class="header-actions">
       <button class="btn btn-dl" onclick="downloadSVG()">📥 Save SVG</button>
@@ -299,10 +358,10 @@ a{color:inherit;text-decoration:none}
   <div class="services-bar fade-in" style="animation-delay:.1s">
     <span class="label">External Services:</span>
     <div class="service-pill" data-svc="lovable" onclick="highlightService('lovable')" style="--c:#EC4899">
-      <span class="dot" style="background:#EC4899"></span> Lovable <span class="count" style="color:#EC4899">3</span>
+      <span class="dot" style="background:#EC4899"></span> Lovable <span class="count" style="color:#EC4899">9</span>
     </div>
     <div class="service-pill" data-svc="claude" onclick="highlightService('claude')" style="--c:#8B5CF6">
-      <span class="dot" style="background:#8B5CF6"></span> Claude AI <span class="count" style="color:#8B5CF6">3</span>
+      <span class="dot" style="background:#8B5CF6"></span> Claude AI <span class="count" style="color:#8B5CF6">7</span>
     </div>
     <div class="service-pill" data-svc="chatprd" onclick="highlightService('chatprd')" style="--c:#F59E0B">
       <span class="dot" style="background:#F59E0B"></span> ChatPRD <span class="count" style="color:#F59E0B">2</span>
@@ -339,9 +398,16 @@ a{color:inherit;text-decoration:none}
     <div class="layer-label" style="top:710px;left:0;color:#8B5CF6;border-color:rgba(139,92,246,.2);background:rgba(139,92,246,.05)">Infrastructure</div>
 
     <!-- ═══ NODES ═══ -->
+    <!-- Mobile section labels (hidden on desktop via layer-labels) -->
+    <style>
+      .mobile-section{display:none;padding:8px 12px;margin:12px 0 6px;border-radius:8px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;border:1px solid}
+      @media(max-width:900px){.mobile-section{display:flex;align-items:center;gap:8px}}
+    </style>
+
+    <div class="mobile-section" style="color:#3B82F6;border-color:rgba(59,130,246,.2);background:rgba(59,130,246,.05)">🌍 External AI Services</div>
     <!-- External (y:30) -->
     <div class="node" id="n-lovable" data-layer="external" style="left:0;top:30px;width:170px;border-color:rgba(236,72,153,.25)" onclick="openInfo('lovable')">
-      <div class="node-header"><div class="node-icon" style="background:rgba(236,72,153,.12)">💖</div><div><div class="node-title" style="color:#EC4899">Lovable</div><div class="node-sub">Vibe Coding Platform</div></div></div>
+      <div class="node-header"><div class="node-icon" style="background:rgba(236,72,153,.12)">💖</div><div><div class="node-title" style="color:#EC4899">Lovable</div><div class="node-sub">Build · Deploy · Host (Auto CI/CD)</div></div></div>
     </div>
     <div class="node" id="n-claude" data-layer="external" style="left:200px;top:30px;width:170px;border-color:rgba(139,92,246,.25)" onclick="openInfo('claude')">
       <div class="node-header"><div class="node-icon" style="background:rgba(139,92,246,.12)">🧠</div><div><div class="node-title" style="color:#8B5CF6">Claude AI</div><div class="node-sub">Deep Analysis</div></div></div>
@@ -356,6 +422,7 @@ a{color:inherit;text-decoration:none}
       <div class="node-header"><div class="node-icon" style="background:rgba(59,130,246,.12)">✨</div><div><div class="node-title" style="color:#3B82F6">Gemini</div><div class="node-sub">Primary AI</div></div></div>
     </div>
 
+    <div class="mobile-section" style="color:#06B6D4;border-color:rgba(6,182,212,.2);background:rgba(6,182,212,.05)">🖥️ Frontend Layer</div>
     <!-- Frontend (y:140) -->
     <div class="node" id="n-frontend" data-layer="frontend" style="left:50px;top:140px;width:260px;border-color:rgba(6,182,212,.25)" onclick="openInfo('frontend')">
       <div class="node-header"><div class="node-icon" style="background:rgba(6,182,212,.12)">🖥️</div><div><div class="node-title" style="color:#06B6D4">React SPA</div><div class="node-sub">12+ pages · React 18 · TypeScript · Tailwind</div></div></div>
@@ -367,6 +434,7 @@ a{color:inherit;text-decoration:none}
       <div class="node-header"><div class="node-icon" style="background:rgba(168,85,247,.12)">📱</div><div><div class="node-title" style="color:#A855F7">Display Mode <span class="node-badge" style="background:rgba(236,72,153,.15);color:#EC4899">NEW</span></div><div class="node-sub">🖥💻📱📲 4 responsive modes</div></div></div>
     </div>
 
+    <div class="mobile-section" style="color:#F97316;border-color:rgba(249,115,22,.2);background:rgba(249,115,22,.05)">⚡ Prompts & Logic Engine</div>
     <!-- Logic (y:260) -->
     <div class="node" id="n-classifier" data-layer="logic" style="left:0;top:260px;width:175px;border-color:rgba(16,185,129,.25)" onclick="openInfo('classifier')">
       <div class="node-header"><div class="node-icon" style="background:rgba(16,185,129,.12)">🔬</div><div><div class="node-title" style="color:#10B981">Classifier</div><div class="node-sub">AI Stage Classification</div></div></div>
@@ -384,6 +452,7 @@ a{color:inherit;text-decoration:none}
       <div class="node-header"><div class="node-icon" style="background:rgba(236,72,153,.12)">✨</div><div><div class="node-title" style="color:#EC4899">AI Enhance <span class="node-badge" style="background:rgba(236,72,153,.15);color:#EC4899">NEW</span></div><div class="node-sub">Content Generation</div></div></div>
     </div>
 
+    <div class="mobile-section" style="color:#10B981;border-color:rgba(16,185,129,.2);background:rgba(16,185,129,.05)">☁️ Backend Services</div>
     <!-- Backend (y:400) -->
     <div class="node" id="n-edgefn" data-layer="backend" style="left:30px;top:400px;width:210px;border-color:rgba(6,182,212,.25)" onclick="openInfo('edgefn')">
       <div class="node-header"><div class="node-icon" style="background:rgba(6,182,212,.12)">☁️</div><div><div class="node-title" style="color:#06B6D4">Edge Functions</div><div class="node-sub">Deno · chat-ai · send-pm-report</div></div></div>
@@ -398,6 +467,7 @@ a{color:inherit;text-decoration:none}
       <div class="node-header"><div class="node-icon" style="background:rgba(239,68,68,.12)">📧</div><div><div class="node-title" style="color:#EF4444">Email Auto <span class="node-badge" style="background:rgba(236,72,153,.15);color:#EC4899">NEW</span></div><div class="node-sub">Resend · pg_cron · Nightly</div></div></div>
     </div>
 
+    <div class="mobile-section" style="color:#F59E0B;border-color:rgba(245,158,11,.2);background:rgba(245,158,11,.05)">🗄️ Data & Auth Layer</div>
     <!-- Data (y:530) -->
     <div class="node" id="n-supabase" data-layer="data" style="left:120px;top:530px;width:320px;border-color:rgba(16,185,129,.25)" onclick="openInfo('supabase')">
       <div class="node-header"><div class="node-icon" style="background:rgba(16,185,129,.12)">🗄️</div><div><div class="node-title" style="color:#10B981">Supabase</div><div class="node-sub">PostgreSQL · Auth · Edge Fn · RLS · pg_cron</div></div></div>
@@ -406,11 +476,13 @@ a{color:inherit;text-decoration:none}
       <div class="node-header"><div class="node-icon" style="background:rgba(245,158,11,.12)">🔑</div><div><div class="node-title" style="color:#F59E0B">Authentication</div><div class="node-sub">Google OAuth · JWT · ProtectedRoute</div></div></div>
     </div>
 
+    <div class="mobile-section" style="color:#EF4444;border-color:rgba(239,68,68,.2);background:rgba(239,68,68,.05)">🛡️ Security & Privacy</div>
     <!-- Security (y:640) -->
     <div class="node" id="n-security" data-layer="security" style="left:200px;top:640px;width:400px;border-color:rgba(239,68,68,.25)" onclick="openInfo('security')">
       <div class="node-header"><div class="node-icon" style="background:rgba(239,68,68,.12)">🛡️</div><div><div class="node-title" style="color:#EF4444">Security & Privacy</div><div class="node-sub">HTTPS · RLS · CORS · In-Memory Keys · GDPR/PDPA</div></div></div>
     </div>
 
+    <div class="mobile-section" style="color:#8B5CF6;border-color:rgba(139,92,246,.2);background:rgba(139,92,246,.05)">📋 Infrastructure & PM</div>
     <!-- Infrastructure (y:740) -->
     <div class="node" id="n-pmdash" data-layer="infra" style="left:50px;top:740px;width:260px;border-color:rgba(139,92,246,.25)" onclick="openInfo('pmdash')">
       <div class="node-header"><div class="node-icon" style="background:rgba(139,92,246,.12)">📋</div><div><div class="node-title" style="color:#8B5CF6">PM Command Center</div><div class="node-sub">9 Tabs · Feedback · Growth · TRUST</div></div></div>
@@ -418,9 +490,7 @@ a{color:inherit;text-decoration:none}
     <div class="node" id="n-metrics" data-layer="infra" style="left:370px;top:740px;width:260px;border-color:rgba(6,182,212,.25)" onclick="openInfo('metrics')">
       <div class="node-header"><div class="node-icon" style="background:rgba(6,182,212,.12)">📈</div><div><div class="node-title" style="color:#06B6D4">Success Metrics <span class="node-badge" style="background:rgba(236,72,153,.15);color:#EC4899">NEW</span></div><div class="node-sub">PRD Gap Analysis · TRUST Framework</div></div></div>
     </div>
-    <div class="node" id="n-github" data-layer="infra" style="left:690px;top:740px;width:200px;border-color:rgba(100,116,139,.25)" onclick="openInfo('github')">
-      <div class="node-header"><div class="node-icon" style="background:rgba(100,116,139,.12)">🐙</div><div><div class="node-title" style="color:#94A3B8">GitHub</div><div class="node-sub">Version Control · CI/CD</div></div></div>
-    </div>
+
   </div>
 
   <!-- Legend -->
@@ -453,7 +523,7 @@ a{color:inherit;text-decoration:none}
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">
       <h3 style="font-size:12px;font-weight:800;color:#8B5CF6;margin-bottom:10px">AI & Integrations</h3>
       <ul style="list-style:none;font-size:10px;color:var(--muted);line-height:2">
-        <li>• Gemini 2.0 Flash (primary AI)</li><li>• OpenAI GPT-4o-mini (fallback)</li><li>• Claude Sonnet (deep analysis)</li><li>• ChatPRD (PRD methodology)</li><li>• Lovable (vibe coding)</li><li>• GitHub (version control + CI/CD)</li>
+        <li>• Gemini 2.0 Flash (primary AI)</li><li>• OpenAI GPT-4o-mini (fallback)</li><li>• Claude Sonnet (deep analysis)</li><li>• ChatPRD (PRD methodology)</li><li>• Lovable (vibe coding platform)</li>
       </ul>
     </div>
   </div>
@@ -471,8 +541,8 @@ a{color:inherit;text-decoration:none}
 <script>
 // ═══ Data ═══
 const NODES_DATA = {
-  lovable: { title:"Lovable", sub:"Vibe Coding Platform", color:"#EC4899", tech:["React+TS","Tailwind","shadcn/ui","Auto-Deploy"], details:["AI-assisted code generation","Real-time preview","Git integration","Supabase connector","Component library"], connections:["frontend","github"] },
-  claude: { title:"Anthropic Claude", sub:"Architecture & Deep Analysis", color:"#8B5CF6", tech:["claude-sonnet-4-20250514","200K context","Messages API"], details:["Architecture design","Deep analytical reasoning","Long-context analysis","Code review","PRD support"], connections:["edgefn","aienhance"] },
+  lovable: { title:"Lovable", sub:"Build · Deploy · Host (Auto CI/CD)", color:"#EC4899", tech:["React+TS","Tailwind","shadcn/ui","Auto-Deploy","Hosting","Supabase"], details:["AI-assisted vibe coding platform","Builds entire frontend SPA","Auto-deploys to .lovable.app hosting","No GitHub needed — Lovable IS the CI/CD","Generates all UI components + pages","Deploys Supabase Edge Functions","Connects Auth, DB, Storage automatically","Powers all 12+ feature pages"], connections:["frontend","uiux","edgefn","supabase","auth","classifier","chatbot","feedback","email","pmdash"] },
+  claude: { title:"Anthropic Claude", sub:"Architecture & Deep Analysis", color:"#8B5CF6", tech:["claude-sonnet-4-20250514","200K context","Messages API"], details:["Architecture design & code review","Deep analytical reasoning","PRD generation support","AI Enhance content expansion","Chatbot deep analysis mode","System prompt engineering"], connections:["edgefn","aienhance","chatbot","classifier","pmdash","metrics","feedback"] },
   chatprd: { title:"ChatPRD", sub:"PRD Methodology", color:"#F59E0B", tech:["PRD Generation","User Stories","Success Metrics"], details:["Automated PRD creation","Success metric frameworks","TRUST framework eval","Milestone planning"], connections:["pmdash","metrics"], isNew:true },
   openai: { title:"ChatGPT / OpenAI", sub:"General AI & Classification", color:"#10B981", tech:["gpt-4o-mini","Function Calling"], details:["Startup classification","Structured output","Fallback provider"], connections:["edgefn"] },
   gemini: { title:"Google Gemini", sub:"Primary AI Provider", color:"#3B82F6", tech:["gemini-2.0-flash","Streaming","Safety Settings"], details:["Primary chat & classification","PWMOIC analysis","Multi-turn context","Low-latency streaming"], connections:["edgefn","chatbot"] },
@@ -493,18 +563,33 @@ const NODES_DATA = {
   security: { title:"Security & Privacy", sub:"Data Protection", color:"#EF4444", tech:["HTTPS","RLS","CORS","GDPR/PDPA"], details:["In-memory API keys","RLS user isolation","CORS on Edge Functions","GDPR/PDPA compliant","Admin-only PM access"], connections:["supabase","edgefn","auth"] },
   pmdash: { title:"PM Command Center", sub:"9-Tab Dashboard", color:"#8B5CF6", tech:["Overview","Feedback","Growth","Funnel","Metrics","B2B","Roadmap","Competitive","System"], details:["PRD goal tracking","AI recommendations","NPS/satisfaction analytics","B2B pipeline","Email automation tab"], connections:["supabase","feedback","metrics","email"] },
   metrics: { title:"Success Metrics & TRUST", sub:"PRD Gap Analysis + Ethics", color:"#06B6D4", tech:["9 Metrics","TRUST Radar","5 Pillars","20 Sub-metrics"], details:["User/Business/Technical metrics","TRUST: T-R-U-S-T pillars","AI governance summary","Gap analysis visualization"], connections:["pmdash","chatprd"], isNew:true },
-  github: { title:"GitHub", sub:"Version Control & CI/CD", color:"#94A3B8", tech:["Git","Auto-Deploy","Lovable"], details:["Source repository","Auto-deploy on push","Branch development"], connections:["lovable","frontend"] },
 };
 
 const CONNECTIONS = [
-  {from:"lovable",to:"frontend",color:"#8B5CF6",label:"Code Gen"},
-  {from:"lovable",to:"github",color:"#8B5CF6",label:"Auto-Deploy"},
-  {from:"claude",to:"edgefn",color:"#8B5CF6",label:"Deep Analysis"},
-  {from:"claude",to:"aienhance",color:"#EC4899",label:"Enhancement"},
+  // Lovable → entire system (it builds everything)
+  {from:"lovable",to:"frontend",color:"#EC4899",label:"Builds SPA"},
+  {from:"lovable",to:"uiux",color:"#EC4899",label:"UI Components"},
+  {from:"lovable",to:"edgefn",color:"#EC4899",label:"Edge Functions"},
+  {from:"lovable",to:"supabase",color:"#EC4899",label:"DB + Auth Setup"},
+  {from:"lovable",to:"classifier",color:"#EC4899",label:"Classifier Page"},
+  {from:"lovable",to:"chatbot",color:"#EC4899",label:"Chatbot Panel"},
+  {from:"lovable",to:"feedback",color:"#EC4899",label:"Feedback System"},
+  {from:"lovable",to:"pmdash",color:"#EC4899",label:"PM Dashboard"},
+  {from:"lovable",to:"email",color:"#EC4899",label:"Email Automation"},
+  // Claude → deep analysis across features
+  {from:"claude",to:"edgefn",color:"#8B5CF6",label:"API Provider"},
+  {from:"claude",to:"aienhance",color:"#8B5CF6",label:"Content Expand"},
+  {from:"claude",to:"chatbot",color:"#8B5CF6",label:"Deep Chat Mode"},
+  {from:"claude",to:"classifier",color:"#8B5CF6",label:"Classification AI"},
+  {from:"claude",to:"pmdash",color:"#8B5CF6",label:"AI Recommendations"},
+  {from:"claude",to:"metrics",color:"#8B5CF6",label:"TRUST Analysis"},
+  {from:"claude",to:"feedback",color:"#8B5CF6",label:"Sentiment Analysis"},
+  // Other services
   {from:"chatprd",to:"metrics",color:"#F59E0B",label:"PRD Framework"},
   {from:"openai",to:"edgefn",color:"#10B981",label:"Chat API"},
   {from:"gemini",to:"edgefn",color:"#3B82F6",label:"Primary AI"},
   {from:"gemini",to:"chatbot",color:"#3B82F6",label:"Chat Responses"},
+  // Internal flows
   {from:"frontend",to:"auth",color:"#F59E0B",label:"OAuth"},
   {from:"frontend",to:"edgefn",color:"#06B6D4",label:"API Calls"},
   {from:"frontend",to:"classifier",color:"#10B981",label:"Input Data"},
@@ -562,15 +647,15 @@ function drawArrows() {
     const cy2 = to.y - dy * 0.1;
 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const d = \`M \${from.x} \${from.y} C \${cx1} \${cy1}, \${cx2} \${cy2}, \${to.x} \${to.y}\`;
+    const d = 'M ' + from.x + ' ' + from.y + ' C ' + cx1 + ' ' + cy1 + ', ' + cx2 + ' ' + cy2 + ', ' + to.x + ' ' + to.y;
     path.setAttribute('d', d);
     path.setAttribute('stroke', conn.color);
-    path.setAttribute('marker-end', \`url(#ah-\${markerColor})\`);
+    path.setAttribute('marker-end', 'url(#ah-' + markerColor + ')');
     path.setAttribute('class', 'drawn-arrow arrow-path');
     path.setAttribute('stroke-dasharray', '4 3');
     path.setAttribute('data-from', conn.from);
     path.setAttribute('data-to', conn.to);
-    path.style.animationDelay = \`\${i * 0.05}s\`;
+    path.style.animationDelay = (i * 0.05) + 's';
 
     svg.appendChild(path);
 
@@ -579,9 +664,9 @@ function drawArrows() {
     circle.setAttribute('r', '2.5');
     circle.setAttribute('fill', conn.color);
     circle.setAttribute('class', 'drawn-arrow flow-dot');
-    circle.style.offsetPath = \`path("\${d}")\`;
-    circle.style.animationDuration = \`\${2 + Math.random() * 2}s\`;
-    circle.style.animationDelay = \`\${Math.random() * 2}s\`;
+    circle.style.offsetPath = 'path("' + d + '")';
+    circle.style.animationDuration = (2 + Math.random() * 2) + 's';
+    circle.style.animationDelay = (Math.random() * 2) + 's';
     svg.appendChild(circle);
   });
 }
@@ -652,27 +737,15 @@ function openInfo(id) {
   const panel = document.getElementById('infoPanel');
   const content = document.getElementById('infoPanelContent');
 
-  content.innerHTML = \`
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px">
-      <div style="width:40px;height:40px;border-radius:10px;background:\${data.color}15;display:flex;align-items:center;justify-content:center;font-size:18px;border:1px solid \${data.color}33">\${document.querySelector('#n-'+id+' .node-icon')?.textContent||'📦'}</div>
-      <div>
-        <h2 style="color:\${data.color}">\${data.title} \${data.isNew?'<span style="background:rgba(236,72,153,.15);color:#EC4899;padding:1px 6px;border-radius:4px;font-size:8px;margin-left:4px">NEW</span>':''}</h2>
-        <div class="ip-sub">\${data.sub}</div>
-      </div>
-    </div>
-    <div class="ip-section">
-      <h3>Tech Stack</h3>
-      <div style="display:flex;flex-wrap:wrap;gap:4px">\${data.tech.map(t=>\`<span class="tech-tag">\${t}</span>\`).join('')}</div>
-    </div>
-    <div class="ip-section">
-      <h3>Details</h3>
-      <ul class="ip-list">\${data.details.map(d=>\`<li style="color:\${data.color}">\${d}</li>\`).join('')}</ul>
-    </div>
-    <div class="ip-section">
-      <h3>Connections</h3>
-      <div>\${data.connections.map(c=>{const n=NODES_DATA[c];return n?\`<span class="conn-badge" style="background:\${n.color}15;color:\${n.color};border:1px solid \${n.color}33" onclick="closeInfo();setTimeout(()=>openInfo('\${c}'),300)">\${n.title}</span>\`:'';}).join('')}</div>
-    </div>
-  \`;
+  content.innerHTML = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;margin-top:8px">'
+    + '<div style="width:40px;height:40px;border-radius:10px;background:' + data.color + '15;display:flex;align-items:center;justify-content:center;font-size:18px;border:1px solid ' + data.color + '33">' + (document.querySelector('#n-'+id+' .node-icon')?.textContent||'📦') + '</div>'
+    + '<div>'
+    + '<h2 style="color:' + data.color + '">' + data.title + (data.isNew ? ' <span style="background:rgba(236,72,153,.15);color:#EC4899;padding:1px 6px;border-radius:4px;font-size:8px;margin-left:4px">NEW</span>' : '') + '</h2>'
+    + '<div class="ip-sub">' + data.sub + '</div>'
+    + '</div></div>'
+    + '<div class="ip-section"><h3>Tech Stack</h3><div style="display:flex;flex-wrap:wrap;gap:4px">' + data.tech.map(function(t){return '<span class="tech-tag">'+t+'</span>';}).join('') + '</div></div>'
+    + '<div class="ip-section"><h3>Details</h3><ul class="ip-list">' + data.details.map(function(d){return '<li style="color:'+data.color+'">'+d+'</li>';}).join('') + '</ul></div>'
+    + '<div class="ip-section"><h3>Connections</h3><div>' + data.connections.map(function(c){var n=NODES_DATA[c];return n ? '<span class="conn-badge" style="background:'+n.color+'15;color:'+n.color+';border:1px solid '+n.color+'33" onclick="closeInfo();setTimeout(function(){openInfo(\\''+c+'\\')},300)">'+n.title+'</span>' : '';}).join('') + '</div></div>';
 
   panel.classList.add('open');
   document.getElementById('overlay').classList.add('open');
@@ -684,41 +757,38 @@ function closeInfo() {
 }
 
 function downloadSVG() {
-  const canvas = document.getElementById('canvas');
-  const rect = canvas.getBoundingClientRect();
-  const w = rect.width, h = rect.height;
+  var canvas = document.getElementById('canvas');
+  var rect = canvas.getBoundingClientRect();
+  var w = rect.width, h = rect.height;
   
-  // Create a standalone SVG
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
+  var ns = 'http://www.w3.org/2000/svg';
+  var svg = document.createElementNS(ns, 'svg');
   svg.setAttribute('xmlns', ns);
   svg.setAttribute('width', w);
   svg.setAttribute('height', h + 40);
   svg.setAttribute('viewBox', '0 0 ' + w + ' ' + (h + 40));
   svg.setAttribute('style', 'background:#0B0F19');
 
-  // Title
-  const title = document.createElementNS(ns, 'text');
+  var title = document.createElementNS(ns, 'text');
   title.setAttribute('x', '20');
   title.setAttribute('y', '24');
   title.setAttribute('fill', '#E2E8F0');
   title.setAttribute('font-size', '16');
   title.setAttribute('font-weight', '800');
   title.setAttribute('font-family', 'Segoe UI, sans-serif');
-  title.textContent = 'LoopAI Core Architecture — 23 components · 30 data flows';
+  title.textContent = 'LoopAI Core Architecture — 22 components · 40 data flows';
   svg.appendChild(title);
 
-  const g = document.createElementNS(ns, 'g');
+  var g = document.createElementNS(ns, 'g');
   g.setAttribute('transform', 'translate(0, 40)');
 
-  // Draw nodes as rects with text
   document.querySelectorAll('.node').forEach(function(node) {
-    const nr = node.getBoundingClientRect();
-    const cr = canvas.getBoundingClientRect();
-    const x = nr.left - cr.left, y = nr.top - cr.top;
-    const bc = node.style.borderColor || '#1E293B';
+    var nr = node.getBoundingClientRect();
+    var cr = canvas.getBoundingClientRect();
+    var x = nr.left - cr.left, y = nr.top - cr.top;
+    var bc = node.style.borderColor || '#1E293B';
     
-    const r = document.createElementNS(ns, 'rect');
+    var r = document.createElementNS(ns, 'rect');
     r.setAttribute('x', x);
     r.setAttribute('y', y);
     r.setAttribute('width', nr.width);
@@ -729,12 +799,12 @@ function downloadSVG() {
     r.setAttribute('stroke-width', '1');
     g.appendChild(r);
 
-    const titleEl = node.querySelector('.node-title, .nt');
-    const subEl = node.querySelector('.node-sub, .ns');
-    const iconEl = node.querySelector('.node-icon, .ni');
+    var titleEl = node.querySelector('.node-title');
+    var subEl = node.querySelector('.node-sub');
+    var iconEl = node.querySelector('.node-icon');
 
     if (iconEl) {
-      const it = document.createElementNS(ns, 'text');
+      var it = document.createElementNS(ns, 'text');
       it.setAttribute('x', x + 14);
       it.setAttribute('y', y + 22);
       it.setAttribute('font-size', '12');
@@ -743,7 +813,7 @@ function downloadSVG() {
     }
 
     if (titleEl) {
-      const tt = document.createElementNS(ns, 'text');
+      var tt = document.createElementNS(ns, 'text');
       tt.setAttribute('x', x + 40);
       tt.setAttribute('y', y + 20);
       tt.setAttribute('fill', titleEl.style.color || '#E2E8F0');
@@ -755,7 +825,7 @@ function downloadSVG() {
     }
 
     if (subEl) {
-      const st = document.createElementNS(ns, 'text');
+      var st = document.createElementNS(ns, 'text');
       st.setAttribute('x', x + 40);
       st.setAttribute('y', y + 34);
       st.setAttribute('fill', '#64748B');
@@ -766,9 +836,8 @@ function downloadSVG() {
     }
   });
 
-  // Copy arrow paths
-  document.querySelectorAll('#arrowsSvg .arrow-path, #as .arrow-path, .da.arrow-path').forEach(function(path) {
-    const p = document.createElementNS(ns, 'path');
+  document.querySelectorAll('#arrowsSvg .arrow-path').forEach(function(path) {
+    var p = document.createElementNS(ns, 'path');
     p.setAttribute('d', path.getAttribute('d'));
     p.setAttribute('stroke', path.getAttribute('stroke'));
     p.setAttribute('stroke-width', '1.5');
@@ -778,11 +847,10 @@ function downloadSVG() {
     g.appendChild(p);
   });
 
-  // Layer labels
   document.querySelectorAll('.layer-label').forEach(function(lbl) {
-    const lr = lbl.getBoundingClientRect();
-    const cr = canvas.getBoundingClientRect();
-    const lt = document.createElementNS(ns, 'text');
+    var lr = lbl.getBoundingClientRect();
+    var cr = canvas.getBoundingClientRect();
+    var lt = document.createElementNS(ns, 'text');
     lt.setAttribute('x', lr.left - cr.left);
     lt.setAttribute('y', lr.top - cr.top + 12);
     lt.setAttribute('fill', lbl.style.color || '#64748B');
@@ -796,8 +864,7 @@ function downloadSVG() {
 
   svg.appendChild(g);
 
-  // Footer
-  const footer = document.createElementNS(ns, 'text');
+  var footer = document.createElementNS(ns, 'text');
   footer.setAttribute('x', w / 2);
   footer.setAttribute('y', h + 30);
   footer.setAttribute('fill', '#475569');
@@ -807,12 +874,11 @@ function downloadSVG() {
   footer.textContent = 'LoopAI for TECH 41 Stanford · Educational Purpose Only · @ 2026 Dr. Kie Prayarach';
   svg.appendChild(footer);
 
-  // Serialize and download
-  const serializer = new XMLSerializer();
-  const svgStr = serializer.serializeToString(svg);
-  const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  var serializer = new XMLSerializer();
+  var svgStr = serializer.serializeToString(svg);
+  var blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
   a.href = url;
   a.download = 'LoopAI_Architecture.svg';
   document.body.appendChild(a);
@@ -821,25 +887,37 @@ function downloadSVG() {
   URL.revokeObjectURL(url);
 }
 
-// Fix #2: Refresh — reset to default view with all arrows
 function refreshArchitecture() {
-  // Reset highlights
   resetHighlight();
-  // Re-enable arrows
   showingFlows = true;
   document.getElementById('toggleFlows').textContent = 'Hide Arrows';
   document.getElementById('toggleFlows').classList.add('active');
-  // Close info panel
   closeInfo();
-  // Redraw arrows fresh
   drawArrows();
 }
 
 // ═══ Init ═══
-window.addEventListener('load', () => {
+window.addEventListener('load', function() {
   setTimeout(drawArrows, 500);
-  // Redraw on resize
   window.addEventListener('resize', drawArrows);
+
+  document.getElementById('overlay').addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+
+  var touchStartY = 0;
+  var panel = document.getElementById('infoPanel');
+  panel.addEventListener('touchstart', function(e) {
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  panel.addEventListener('touchend', function(e) {
+    var deltaY = e.changedTouches[0].clientY - touchStartY;
+    if (deltaY > 80) { closeInfo(); }
+  }, { passive: true });
+
+  if (window.innerWidth <= 600) {
+    var handle = document.createElement('div');
+    handle.style.cssText = 'width:40px;height:4px;border-radius:2px;background:#334155;margin:8px auto 4px;';
+    panel.insertBefore(handle, panel.firstChild);
+  }
 });
 </script>
 </body>
