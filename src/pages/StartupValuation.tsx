@@ -78,6 +78,32 @@ export default function ValuationSimulator() {
 
   const handleComputeClick = () => { if (!surveyCompleted) { setShowSurvey(true); } else { handleCalc(); } };
 
+  const handleSurveyComplete = (result: import("@/components/FeedbackSurvey").SurveyResult) => {
+    addFeedback(result);
+    // Also create a CustomerReview so it appears in Customer Feedback page
+    const { addCustomerReview } = useAppRef.current;
+    const review: import("@/contexts/AppContext").CustomerReview = {
+      id: crypto.randomUUID(),
+      featureId: "valuation",
+      userName: "Session User",
+      userEmail: "user@session.local",
+      rating: Math.round(result.wouldRecommend / 2),
+      title: result.mostValuable ? `Most valuable: ${result.mostValuable}` : "Valuation Simulator Feedback",
+      comment: result.suggestion || `Satisfaction: ${result.satisfaction}/5. Would recommend: ${result.wouldRecommend}/10.`,
+      aiEnhanced: false,
+      helpful: 0,
+      notHelpful: 0,
+      createdAt: new Date().toISOString(),
+      sentiment: result.wouldRecommend >= 7 ? "positive" : result.wouldRecommend >= 4 ? "neutral" : "negative",
+      userRole: "User",
+    };
+    addCustomerReview(review);
+    setSurveyCompleted(true);
+    setShowSurvey(false);
+    toast.success("Thank you for your feedback!");
+    handleCalc();
+  };
+
   const handleMode = (m: "synthetic" | "custom") => {
     setMode(m);
     if (m === "synthetic") {
