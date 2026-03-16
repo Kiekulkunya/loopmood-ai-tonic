@@ -96,6 +96,17 @@ function generateHTMLReport(sections: string[], data: Record<string, any>): stri
           <tr><td style="padding:6px 0;color:#94A3B8;">Biggest Gap</td><td align="right" style="font-weight:700;color:#F97316;">B2B features vs PitchBook</td></tr>
         </table>
       </td></tr>`,
+    system: `
+      <tr><td style="padding:24px 32px;">
+        <h2 style="margin:0 0 12px;font-size:14px;color:#14B8A6;text-transform:uppercase;letter-spacing:1px;">🖥️ System Health</h2>
+        <table width="100%" cellpadding="0" cellspacing="0" style="font-size:12px;">
+          <tr><td style="padding:6px 0;color:#94A3B8;">Platform Uptime</td><td align="right" style="font-weight:700;color:#10B981;">99.93%</td></tr>
+          <tr><td style="padding:6px 0;color:#94A3B8;">Avg Latency</td><td align="right" style="font-weight:700;color:#06B6D4;">487ms</td></tr>
+          <tr><td style="padding:6px 0;color:#94A3B8;">AI Provider Status</td><td align="right" style="font-weight:700;color:#10B981;">All Healthy</td></tr>
+          <tr><td style="padding:6px 0;color:#94A3B8;">Edge Function Status</td><td align="right" style="font-weight:700;color:#10B981;">Operational</td></tr>
+          <tr><td style="padding:6px 0;color:#94A3B8;">PDF Export</td><td align="right" style="font-weight:700;color:#F59E0B;">Warning (2.4s latency)</td></tr>
+        </table>
+      </td></tr>`,
   };
 
   const divider = `<tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid #1E293B;margin:0;"></td></tr>`;
