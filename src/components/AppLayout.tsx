@@ -52,7 +52,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/app/pm/log": "Activity Log",
   "/app/pm/traffic": "Traffic Analytics",
   "/app/pm/dashboard": "PM Dashboard",
-  "/app/pm/architecture": "LoopAI Structure",
+  "/app/pm/architecture": "LoopAI Core Architecture",
   "/app/pm/email": "Email Report Automation",
 };
 
