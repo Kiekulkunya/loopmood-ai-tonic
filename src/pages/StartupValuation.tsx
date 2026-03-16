@@ -44,7 +44,7 @@ const SCORE_COLORS: Record<number, string> = { 1: "#EF4444", 2: "#F97316", 3: "#
 
 export default function ValuationSimulator() {
   const { weights, setWeights, firmScores, setFirmScores, firmNames, setFirmNames } = useValuation();
-  const { addFeedback } = useApp();
+  const { addFeedback, addCustomerReview } = useApp();
   const [calculated, setCalculated] = useState(true);
   const [isCalc, setIsCalc] = useState(false);
   const [mode, setMode] = useState<"synthetic" | "custom">("synthetic");
@@ -78,11 +78,36 @@ export default function ValuationSimulator() {
 
   const handleComputeClick = () => { if (!surveyCompleted) { setShowSurvey(true); } else { handleCalc(); } };
 
+  const handleSurveyComplete = (result: import("@/components/FeedbackSurvey").SurveyResult) => {
+    addFeedback(result);
+    // Also create a CustomerReview so it appears in Customer Feedback page
+    const review: import("@/contexts/AppContext").CustomerReview = {
+      id: crypto.randomUUID(),
+      featureId: "valuation",
+      userName: "Session User",
+      userEmail: "user@session.local",
+      rating: Math.round(result.wouldRecommend / 2),
+      title: result.mostValuable ? `Most valuable: ${result.mostValuable}` : "Valuation Simulator Feedback",
+      comment: result.suggestion || `Satisfaction: ${result.satisfaction}/5. Would recommend: ${result.wouldRecommend}/10.`,
+      aiEnhanced: false,
+      helpful: 0,
+      notHelpful: 0,
+      createdAt: new Date().toISOString(),
+      sentiment: result.wouldRecommend >= 7 ? "positive" : result.wouldRecommend >= 4 ? "neutral" : "negative",
+      userRole: "User",
+    };
+    addCustomerReview(review);
+    setSurveyCompleted(true);
+    setShowSurvey(false);
+    toast.success("Thank you for your feedback!");
+    handleCalc();
+  };
+
   const handleMode = (m: "synthetic" | "custom") => {
     setMode(m);
     if (m === "synthetic") {
       setWeights([10,10,5,5,5,5,7,3,5,5,5,2.5,2.5,2.5,2.5,5,5,2.5,2.5,2.5,2.5,2.5,2.5]);
-      setFirmScores([[3,3,2,2,3,4,5,2,1,2,1,1,2,5,2,1,3,2,2,2,2],[2,2,2,2,2,2,2,2,5,5,5,5,5,5,4,3,2,3,2,4,4],[1,2,2,1,3,2,1,1,3,2,4,1,2,5,2,2,3,4,3,5,3]]);
+      setFirmScores([[3,3,2,2,3,4,5,2,1,2,1,1,2,5,2,1,3,2,2,2,2,2,2],[2,2,2,2,2,2,2,2,5,5,5,5,5,5,4,3,2,3,2,4,4,4,4],[1,2,2,1,3,2,1,1,3,2,4,1,2,5,2,2,3,4,3,5,3,3,3]]);
       setFirmNames(["Firm A", "Firm B", "Firm C"]);
     }
   };
@@ -182,7 +207,7 @@ export default function ValuationSimulator() {
         {isCalc ? <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Computing...</span> : <span className="flex items-center gap-2"><Zap className="w-4 h-4" />Compute Valuation</span>}
       </Button>
 
-      <FeedbackSurvey open={showSurvey} onClose={() => setShowSurvey(false)} onComplete={(result) => { addFeedback(result); setSurveyCompleted(true); setShowSurvey(false); toast.success("Thank you for your feedback!"); handleCalc(); }} onSkip={() => { setSurveyCompleted(true); setShowSurvey(false); handleCalc(); }} />
+      <FeedbackSurvey open={showSurvey} onClose={() => setShowSurvey(false)} onComplete={handleSurveyComplete} onSkip={() => { setSurveyCompleted(true); setShowSurvey(false); handleCalc(); }} />
 
       {calculated && (
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
