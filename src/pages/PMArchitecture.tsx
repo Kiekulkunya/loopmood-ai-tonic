@@ -66,7 +66,8 @@ const NODES: SysNode[] = [
 const LAYERS = [
   { id:"external", label:"External AI Services", color:"#3B82F6", icon:Globe },
   { id:"frontend", label:"Frontend Layer", color:"#06B6D4", icon:Monitor },
-  { id:"logic", label:"Prompts & Logic Engine", color:"#F97316", icon:Cpu },
+  { id:"prompts", label:"Prompt Engineering", color:"#14B8A6", icon:Brain },
+  { id:"features", label:"Application Features", color:"#F97316", icon:Cpu },
   { id:"backend", label:"Backend Services", color:"#10B981", icon:Server },
   { id:"data", label:"Data & Auth Layer", color:"#F59E0B", icon:Database },
   { id:"security", label:"Security & Privacy", color:"#EF4444", icon:Shield },
