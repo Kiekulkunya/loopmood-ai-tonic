@@ -68,7 +68,7 @@ function ChartCard({ title, subtitle, children, className = "" }: { title: strin
 }
 
 export default function PMDashboard() {
-  const { logs } = useApp();
+  const { logs, customerReviews } = useApp();
   const [activeSection, setActiveSection] = useState("overview");
   const latest = MONTHLY_DATA[MONTHLY_DATA.length - 1];
   const prev = MONTHLY_DATA[MONTHLY_DATA.length - 2];
