@@ -514,11 +514,16 @@ export default function PMEmailAutomation() {
                 </div>
                 <Button
                   onClick={confirmSchedule}
-                  disabled={scheduleConfirmed}
+                  disabled={scheduleConfirmed || isScheduling}
                   className={`w-full text-xs font-bold ${scheduleConfirmed ? "bg-accent/20 text-accent border border-accent/30 hover:bg-accent/20" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
                 >
-                  {scheduleConfirmed ? (
-                    <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Schedule Confirmed</span>
+                  {isScheduling ? (
+                    <span className="flex items-center gap-1.5">
+                      <div className="w-3.5 h-3.5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                      Setting up schedule...
+                    </span>
+                  ) : scheduleConfirmed ? (
+                    <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Schedule Confirmed ✅</span>
                   ) : (
                     <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" /> Confirm Schedule</span>
                   )}
