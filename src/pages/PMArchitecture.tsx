@@ -1,8 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// src/pages/PMArchitecture.tsx — LoopAI Core Architecture
-// REPLACES existing PMArchitecture.tsx
-// Sidebar label: "LoopAI Core Architecture" (Fix #1)
-// Paste into Lovable file editor
+// src/pages/PMArchitecture.tsx — LoopAI Architecture
+// Sidebar label: "LoopAI Architecture"
 // ═══════════════════════════════════════════════════════════════
 
 import { useState } from "react";
