@@ -204,7 +204,7 @@ export default function CustomerFeedback() {
       userRole: formRole,
     };
 
-    setReviews((prev) => [newReview, ...prev]);
+    addCustomerReview(newReview);
     logAct("feedback_review", "customer-feedback");
     setShowForm(false);
     setFormRating(0);
