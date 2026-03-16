@@ -946,7 +946,8 @@ export default function PMArchitecture() {
     { id: "overview", label: "📋 Overview", color: "#06B6D4" },
     { id: "external", label: "🌍 External AI", color: "#3B82F6" },
     { id: "frontend", label: "🖥️ Frontend", color: "#06B6D4" },
-    { id: "logic", label: "⚡ Prompts & Logic", color: "#F97316" },
+    { id: "prompts", label: "🧬 Prompt Engineering", color: "#14B8A6" },
+    { id: "features", label: "⚡ App Features", color: "#F97316" },
     { id: "backend", label: "☁️ Backend", color: "#10B981" },
     { id: "data", label: "🗄️ Data & Auth", color: "#F59E0B" },
     { id: "security", label: "🛡️ Security", color: "#EF4444" },
@@ -954,7 +955,7 @@ export default function PMArchitecture() {
   ];
 
   const layerForTab = (tab: string) => {
-    const map: Record<string,string> = { external:"external", frontend:"frontend", logic:"logic", backend:"backend", data:"data", security:"security", infra:"infra" };
+    const map: Record<string,string> = { external:"external", frontend:"frontend", prompts:"prompts", features:"features", backend:"backend", data:"data", security:"security", infra:"infra" };
     return map[tab];
   };
 
