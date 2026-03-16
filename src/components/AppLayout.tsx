@@ -38,7 +38,7 @@ const PM_NAV = [
   { label: "Activity Log", icon: ClipboardList, path: "/app/pm/log" },
   { label: "Traffic Analytics", icon: Activity, path: "/app/pm/traffic" },
   { label: "PM Dashboard", icon: LayoutDashboard, path: "/app/pm/dashboard" },
-  { label: "LoopAI Core Architecture", icon: Workflow, path: "/app/pm/architecture" },
+  { label: "LoopAI Architecture", icon: Workflow, path: "/app/pm/architecture" },
   { label: "Email Reports", icon: Mail, path: "/app/pm/email" },
 ];
 
