@@ -99,7 +99,9 @@ function ReviewCard({ review }: { review: CustomerReview }) {
             <div className="flex items-center gap-2 mt-0.5">
               <StarRating value={review.rating} readonly size={12} />
               <span className="text-[9px] text-muted-foreground">
-                {new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                {new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+              </span>
+            </div>
               </span>
             </div>
           </div>
