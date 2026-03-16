@@ -54,6 +54,97 @@ const FEEDBACK_RESPONSES = [
 const FEATURE_MAP: Record<string, { label: string; emoji: string; color: string }> = { classifier: { label: "Startup Classifier", emoji: "🔬", color: "#3B82F6" }, decoded: { label: "Decoded X Return", emoji: "📈", color: "#06B6D4" }, risk: { label: "Risk & PWMOIC", emoji: "⚡", color: "#10B981" }, valuation: { label: "Valuation Simulator", emoji: "🎯", color: "#F59E0B" }, nova: { label: "Nova Dashboard", emoji: "📊", color: "#A855F7" }, chatbot: { label: "Ask LoopAI", emoji: "💬", color: "#EC4899" } };
 const SATISFACTION_TREND = [{ month: "Sep", avg: 3.2, responses: 8 },{ month: "Oct", avg: 3.6, responses: 15 },{ month: "Nov", avg: 3.9, responses: 28 },{ month: "Dec", avg: 4.1, responses: 42 },{ month: "Jan", avg: 4.3, responses: 65 },{ month: "Feb", avg: 4.2, responses: 12 }];
 
+const SUCCESS_METRICS = {
+  userCentric: [
+    { id: "completion", name: "Report Completion Rate", target: 60, current: 62, unit: "%", desc: "% of form-starts that reach completion", trend: [48, 52, 55, 58, 60, 62] },
+    { id: "nps", name: "Net Promoter Score (NPS)", target: 45, current: 42, unit: "", desc: "B2C user satisfaction score", trend: [38, 41, 43, 44, 46, 42] },
+    { id: "returnRate", name: "Return Usage Rate", target: 40, current: 35, unit: "%", desc: "Paid users generating >1 report in 6mo", trend: [18, 22, 26, 30, 33, 35] },
+  ],
+  business: [
+    { id: "mrrGrowth", name: "MRR Growth (MoM)", target: 12, current: 37, unit: "%", desc: "Monthly recurring revenue growth rate", trend: [45, 38, 35, 30, 28, 37] },
+    { id: "b2bContracts", name: "B2B Contracts (Quarterly)", target: 2, current: 2, unit: "", desc: "Enterprise contracts signed per quarter", trend: [0, 0, 1, 1, 2, 2] },
+    { id: "ltvCac", name: "LTV:CAC Ratio", target: 3, current: 2.4, unit: "x", desc: "Lifetime value vs customer acquisition cost", trend: [1.2, 1.5, 1.8, 2.0, 2.2, 2.4] },
+  ],
+  technical: [
+    { id: "reportTime", name: "Report Generation Time (p95)", target: 30, current: 18, unit: "s", desc: "95th percentile generation latency", trend: [42, 35, 28, 22, 20, 18], inverse: true },
+    { id: "uptime", name: "Platform Uptime", target: 99.9, current: 99.93, unit: "%", desc: "Rolling 30-day availability", trend: [99.5, 99.7, 99.8, 99.85, 99.9, 99.93] },
+    { id: "aiAccuracy", name: "AI Scoring Accuracy", target: 90, current: 86, unit: "%", desc: "Within 10% of real-world outcomes", trend: [72, 78, 82, 84, 85, 86] },
+  ],
+};
+
+const TRACKING_EVENTS = [
+  { event: "Form Started", count: 3500, target: 5000, icon: "📝" },
+  { event: "Form Completed", count: 2170, target: 3000, icon: "✅" },
+  { event: "Report Generated", count: 2100, target: 3000, icon: "📊" },
+  { event: "Report Downloaded", count: 1260, target: 2000, icon: "📥" },
+  { event: "Upgrade Clicked", count: 420, target: 800, icon: "⬆️" },
+  { event: "B2B Invite Sent", count: 35, target: 100, icon: "📨" },
+];
+
+const TRUST_PILLARS = [
+  {
+    id: "tried", name: "Tried-and-True", abbr: "T", color: "#3B82F6", icon: ShieldCheck, score: 82, target: 90,
+    desc: "Proven methodologies and validated frameworks",
+    metrics: [
+      { name: "PWMOIC Framework Validation", score: 90, detail: "Peer-reviewed by Dr. Kie Prayarach, tested on 200+ startups" },
+      { name: "Scoring Model Backtesting", score: 78, detail: "Backtested against 150 historical startup outcomes" },
+      { name: "Industry Standard Compliance", score: 85, detail: "Aligned with VC due diligence best practices" },
+      { name: "Methodology Documentation", score: 75, detail: "Complete methodology whitepaper and glossary available" },
+    ],
+    improvements: ["Expand backtesting dataset to 500+ startups", "Publish methodology peer-review paper", "Add industry-specific calibration"],
+  },
+  {
+    id: "reinforced", name: "Reinforced", abbr: "R", color: "#8B5CF6", icon: Shield, score: 75, target: 85,
+    desc: "Robust security, data protection, and system reliability",
+    metrics: [
+      { name: "Data Encryption (Rest + Transit)", score: 95, detail: "AES-256 at rest, TLS 1.3 in transit via Supabase" },
+      { name: "Access Control (RLS)", score: 88, detail: "Row-Level Security on all user data tables" },
+      { name: "API Key Security", score: 70, detail: "In-memory only, but lacks key rotation and vault" },
+      { name: "Audit Trail Coverage", score: 48, detail: "Basic activity logs, lacks full audit trail for compliance" },
+    ],
+    improvements: ["Implement key vault (AWS KMS or Supabase Vault)", "Full audit trail for SOC 2 readiness", "Add MFA authentication option"],
+  },
+  {
+    id: "user", name: "User-Centered", abbr: "U", color: "#10B981", icon: Heart, score: 78, target: 85,
+    desc: "Designed for real user needs with continuous feedback loops",
+    metrics: [
+      { name: "User Satisfaction (CSAT)", score: 84, detail: "4.2/5 average from feedback surveys" },
+      { name: "Feature Adoption Rate", score: 72, detail: "65% of users engage with 3+ features" },
+      { name: "Accessibility (WCAG)", score: 62, detail: "Partial WCAG 2.1 AA — keyboard nav works, ARIA labels incomplete" },
+      { name: "Onboarding Completion", score: 88, detail: "88% complete API setup within first session" },
+    ],
+    improvements: ["Complete WCAG 2.1 AA audit", "Add guided onboarding tour", "Implement progressive disclosure for complex features"],
+  },
+  {
+    id: "sustainable", name: "Sustainable", abbr: "S", color: "#F59E0B", icon: Leaf, score: 70, target: 80,
+    desc: "Long-term viability, scalability, and responsible growth",
+    metrics: [
+      { name: "Revenue Sustainability (LTV:CAC)", score: 72, detail: "2.4x ratio — approaching 3x target" },
+      { name: "Technical Scalability", score: 68, detail: "Supports 500 concurrent users, batch processing needs work" },
+      { name: "Knowledge Transfer", score: 65, detail: "Documentation exists but lacks contributor onboarding guide" },
+      { name: "Environmental Impact", score: 75, detail: "Serverless architecture, minimal compute footprint" },
+    ],
+    improvements: ["Optimize batch processing for B2B scale", "Create comprehensive developer docs", "Implement carbon-aware scheduling"],
+  },
+  {
+    id: "transparent", name: "Transparent", abbr: "T", color: "#EF4444", icon: Eye, score: 73, target: 85,
+    desc: "Open, explainable AI decisions and clear data practices",
+    metrics: [
+      { name: "AI Explainability", score: 68, detail: "Scoring explanations exist but lack granular factor attribution" },
+      { name: "Data Usage Transparency", score: 78, detail: "Privacy policy covers data handling, GDPR/PDPA compliant" },
+      { name: "Pricing Transparency", score: 85, detail: "Clear freemium model with no hidden fees" },
+      { name: "Open Methodology", score: 62, detail: "PWMOIC glossary embedded, full methodology PDF planned" },
+    ],
+    improvements: ["Add per-dimension factor attribution in reports", "Publish model cards for AI scoring", "Create interactive PWMOIC methodology explorer"],
+  },
+];
+
+const TRUST_RADAR_DATA = TRUST_PILLARS.map((p) => ({
+  pillar: p.abbr + " - " + p.name.split(" ")[0],
+  current: p.score,
+  target: p.target,
+}));
+
 const TT = { contentStyle: { backgroundColor: "#0F172A", border: "1px solid #1E293B", borderRadius: 10, fontSize: 11, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" } };
 
 function KPI({ icon: Icon, label, value, sub, color, trend, target }: { icon: any; label: string; value: string | number; sub?: string; color: string; trend?: number; target?: string }) {
