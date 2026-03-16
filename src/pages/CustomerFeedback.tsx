@@ -329,7 +329,7 @@ export default function CustomerFeedback() {
       <div className="flex items-center justify-between">
         <div className="flex gap-1.5">
           <button onClick={() => setActiveFeature("all")} className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold border transition-all ${activeFeature === "all" ? "bg-primary/15 border-primary/30 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}>
-            All ({reviews.length})
+            All ({allReviews.length})
           </button>
           {featureStats.map((f) => {
             const Icon = f.icon;
