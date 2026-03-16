@@ -210,7 +210,7 @@ function NodeCard({ node, isActive, onClick }: { node: SystemNode; isActive: boo
   const Icon = node.icon;
   return (
     <div onClick={onClick} className={`cursor-pointer rounded-xl border p-4 transition-all duration-300 ${isActive ? "ring-1 ring-offset-1 ring-offset-[#0B0F19] scale-[1.02]" : "hover:border-[#334155] hover:bg-white/[0.02]"}`}
-      style={{ borderColor: isActive ? node.color + "55" : "#1E293B", backgroundColor: isActive ? node.color + "08" : "#111827", ringColor: isActive ? node.color : undefined }}>
+      style={{ borderColor: isActive ? node.color + "55" : "#1E293B", backgroundColor: isActive ? node.color + "08" : "#111827" }}>
       <div className="flex items-start gap-3">
         <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: node.color + "15" }}>
           <Icon className="w-4.5 h-4.5" style={{ color: node.color }} />
