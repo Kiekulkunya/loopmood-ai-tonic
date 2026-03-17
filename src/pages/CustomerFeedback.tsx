@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Star, Send, Sparkles, MessageSquare, ThumbsUp, ThumbsDown,
   ChevronDown, ChevronUp, Filter, Clock, User,
@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useApp, type CustomerReview } from "@/contexts/AppContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 const FEATURES = [
   { id: "classifier", name: "Startup Classifier", icon: FlaskConical, color: "#3B82F6", desc: "AI-powered startup stage classification from articles, URLs, and documents" },
   { id: "decoded", name: "Decoded X Return", icon: TrendingUp, color: "#06B6D4", desc: "M×P×T×F risk framework with 7-scenario probability analysis" },
