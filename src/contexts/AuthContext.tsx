@@ -92,7 +92,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const user = session?.user ?? null;
       const role = deriveRole(user);
 
-      // Handle PM pending from Google OAuth
+      // Handle User pending from Google OAuth
+      if (user && sessionStorage.getItem("user_pending") === "true") {
+        sessionStorage.removeItem("user_pending");
+        supabase.auth.updateUser({ data: { role: "user" } });
+        setState({
+          user, session, role: "user", isAuthenticated: true, isPM: false, isLoading: false,
+        });
+        return;
+      }
+
+      // Handle PM pending from Google OAuth (first-time PM with PIN already validated)
       if (user && sessionStorage.getItem("pm_pending") === "true") {
         sessionStorage.removeItem("pm_pending");
         sessionStorage.setItem("pm_pin_validated", "true");
