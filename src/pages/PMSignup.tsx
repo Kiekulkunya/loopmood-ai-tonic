@@ -40,7 +40,7 @@ export default function PMSignup() {
     sessionStorage.setItem("pm_pending", "true");
     sessionStorage.setItem("pm_pin_validated", "true");
     await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/app/pm/log",
+      redirect_uri: window.location.origin,
     });
   };
 

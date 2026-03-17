@@ -33,7 +33,7 @@ export default function UserSignup() {
   const handleGoogle = async () => {
     setLoading(true);
     await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/app/classifier",
+      redirect_uri: window.location.origin,
     });
   };
 
