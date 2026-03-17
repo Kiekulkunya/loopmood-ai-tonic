@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { UserPlus, Mail, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function UserSignup() {
   const [name, setName] = useState("");
@@ -71,8 +72,8 @@ export default function UserSignup() {
         <div className="space-y-4">
           <input type="text" placeholder="Full Name" className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all" value={name} onChange={(e) => setName(e.target.value)} />
           <input type="email" placeholder="Email Address" className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Password" className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <input type="password" placeholder="Confirm Password" className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+          <PasswordInput placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="focus:ring-primary" />
+          <PasswordInput placeholder="Confirm Password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="focus:ring-primary" />
           <button onClick={handleSignup} disabled={loading} className="w-full py-4 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-2xl transition-all shadow-lg shadow-primary/10 disabled:opacity-50">
             {loading ? "Creating Account..." : "Create Account"}
           </button>

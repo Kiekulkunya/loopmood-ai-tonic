@@ -4,6 +4,7 @@ import { UserPlus, Mail, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import PinModal from "@/components/PinModal";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function PMSignup() {
   const [name, setName] = useState("");
@@ -77,9 +78,15 @@ export default function PMSignup() {
         <div className="space-y-4">
           <input type="text" placeholder="Full Name" className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all" value={name} onChange={(e) => setName(e.target.value)} />
           <input type="email" placeholder="Email Address" className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Password" className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <input type="password" placeholder="Confirm Password" className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
-          <input type="password" placeholder="Security PIN (4 digits)" maxLength={4} className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all tracking-[0.5em] text-center" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))} />
+          <PasswordInput placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="focus:ring-accent" />
+          <PasswordInput placeholder="Confirm Password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="focus:ring-accent" />
+          <PasswordInput
+            placeholder="Security PIN (4 digits)"
+            value={pin}
+            onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+            maxLength={4}
+            className="focus:ring-accent tracking-[0.5em] text-center"
+          />
 
           <button onClick={handleSignup} disabled={loading} className="w-full py-4 bg-accent hover:bg-accent/90 text-accent-foreground font-bold rounded-2xl transition-all shadow-lg shadow-accent/10 disabled:opacity-50">
             {loading ? "Creating Account..." : "Create PM Account"}
