@@ -39,10 +39,11 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AuthProvider>
-        <AppProvider>
-          <ValuationProvider>
-            <DisplayProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppProvider>
+            <ValuationProvider>
+              <DisplayProvider>
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<LandingPage />} />
