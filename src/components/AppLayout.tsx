@@ -230,7 +230,7 @@ export default function AppLayout() {
                 {!collapsed && <span>Settings</span>}
               </button>
               <button
-                onClick={async () => { await signOut(); navigate("/login"); }}
+                onClick={async () => { await signOut(); navigate("/"); }}
                 className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-destructive transition-colors"
               >
                 <LogOut size={16} className="shrink-0" />
