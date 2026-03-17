@@ -23,8 +23,9 @@ export default function UserLogin() {
       setLoading(false);
       return;
     }
-    await logActivity("login", "/login/user", { role: "user", method: "email" });
+    // Navigate immediately, log activity in background
     navigate("/app/classifier");
+    logActivity("login", "/login/user", { role: "user", method: "email" }).catch(() => {});
   };
 
   const handleGoogle = async () => {
