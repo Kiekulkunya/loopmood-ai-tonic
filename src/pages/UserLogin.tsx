@@ -30,6 +30,7 @@ export default function UserLogin() {
 
   const handleGoogle = async () => {
     setLoading(true);
+    sessionStorage.setItem("user_pending", "true");
     await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });

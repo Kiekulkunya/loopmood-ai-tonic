@@ -1,10 +1,17 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { ArrowRight, RefreshCw } from "lucide-react";
 import loopaiLogo from "@/assets/loopai-logo.png";
 import DisplayModeSelector from "@/components/DisplayModeSelector";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { isAuthenticated, isPM, isLoading } = useAuth();
+
+  // Redirect authenticated users (especially after OAuth callback) to their dashboard
+  if (!isLoading && isAuthenticated) {
+    return <Navigate to={isPM ? "/app/pm/log" : "/app/classifier"} replace />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 relative overflow-hidden">
