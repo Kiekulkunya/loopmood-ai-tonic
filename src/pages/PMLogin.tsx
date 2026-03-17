@@ -42,10 +42,10 @@ export default function PMLogin() {
     setLoading(true);
     const { error: err } = await supabase.auth.signInWithPassword({ email, password });
     if (err) { setError(err.message); setLoading(false); return; }
-    // Update role to pm
-    await supabase.auth.updateUser({ data: { role: "pm" } });
-    await logActivity("login", "/login/pm", { role: "pm", method: "email" });
+    // Update role and navigate immediately, log in background
+    supabase.auth.updateUser({ data: { role: "pm" } }).catch(() => {});
     navigate("/app/pm/log");
+    logActivity("login", "/login/pm", { role: "pm", method: "email" }).catch(() => {});
   };
 
   const handlePinVerified = () => {
