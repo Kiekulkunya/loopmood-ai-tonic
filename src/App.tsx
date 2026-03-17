@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ValuationProvider } from "@/contexts/ValuationContext";
 import { DisplayProvider } from "@/contexts/DisplayContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AuthRedirect from "@/components/AuthRedirect";
 import AppLayout from "@/components/AppLayout";
 import LandingPage from "@/pages/LandingPage";
 import LoginRoleSelect from "@/pages/LoginRoleSelect";
