@@ -33,9 +33,13 @@ export default function PMLogin() {
     setPmPinValidated(true);
     if (method === "google") {
       sessionStorage.setItem("pm_pending", "true");
-      await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin + "/app/pm/log",
+      const { error: oauthError } = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
       });
+      if (oauthError) {
+        setError("Google sign-in failed. Please try again.");
+        setLoading(false);
+      }
       return;
     }
     // Email login
