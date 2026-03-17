@@ -4,6 +4,7 @@ import { Lock, Mail, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/contexts/AuthContext";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function UserLogin() {
   const [email, setEmail] = useState("");
@@ -23,7 +24,6 @@ export default function UserLogin() {
       setLoading(false);
       return;
     }
-    // Navigate immediately, log activity in background
     navigate("/app/classifier");
     logActivity("login", "/login/user", { role: "user", method: "email" }).catch(() => {});
   };
@@ -62,12 +62,11 @@ export default function UserLogin() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <input
-            type="password"
+          <PasswordInput
             placeholder="Password"
-            className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="focus:ring-primary"
           />
           <button
             onClick={handleLogin}

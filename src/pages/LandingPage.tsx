@@ -8,8 +8,17 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const { isAuthenticated, isPM, isLoading } = useAuth();
 
-  // Redirect authenticated users (especially after OAuth callback) to their dashboard
-  if (!isLoading && isAuthenticated) {
+  // Show loading while auth resolves (prevents flash during OAuth callback)
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted-foreground animate-pulse">Loading...</div>
+      </div>
+    );
+  }
+
+  // Redirect authenticated users to their dashboard
+  if (isAuthenticated) {
     return <Navigate to={isPM ? "/app/pm/log" : "/app/classifier"} replace />;
   }
 

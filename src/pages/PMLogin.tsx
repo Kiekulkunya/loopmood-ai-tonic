@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/contexts/AuthContext";
 import PinModal from "@/components/PinModal";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function PMLogin() {
   const [email, setEmail] = useState("");
@@ -20,7 +21,6 @@ export default function PMLogin() {
   const pinExpired = (location.state as any)?.pinExpired;
 
   const validateAndLogin = async (method: "email" | "google") => {
-    // Quick PIN check from the inline field
     if (pin !== "1234") {
       setPendingAction(method);
       setShowPinModal(true);
@@ -42,11 +42,9 @@ export default function PMLogin() {
       }
       return;
     }
-    // Email login
     setLoading(true);
     const { error: err } = await supabase.auth.signInWithPassword({ email, password });
     if (err) { setError(err.message); setLoading(false); return; }
-    // Update role and navigate immediately, log in background
     supabase.auth.updateUser({ data: { role: "pm" } }).catch(() => {});
     navigate("/app/pm/log");
     logActivity("login", "/login/pm", { role: "pm", method: "email" }).catch(() => {});
@@ -93,8 +91,19 @@ export default function PMLogin() {
 
         <div className="space-y-4">
           <input type="email" placeholder="Email Address" className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Password" className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <input type="password" placeholder="Security PIN (4 digits)" maxLength={4} className="w-full bg-background border border-border rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all tracking-[0.5em] text-center" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))} />
+          <PasswordInput
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="focus:ring-accent"
+          />
+          <PasswordInput
+            placeholder="Security PIN (4 digits)"
+            value={pin}
+            onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+            maxLength={4}
+            className="focus:ring-accent tracking-[0.5em] text-center"
+          />
 
           <button onClick={handleLogin} disabled={loading} className="w-full py-4 bg-accent hover:bg-accent/90 text-accent-foreground font-bold rounded-2xl transition-all shadow-lg shadow-accent/10 flex items-center justify-center disabled:opacity-50">
             {loading ? "Authenticating..." : "Secure Login"}
