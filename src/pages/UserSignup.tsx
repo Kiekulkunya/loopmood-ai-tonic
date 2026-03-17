@@ -32,9 +32,8 @@ export default function UserSignup() {
 
   const handleGoogle = async () => {
     setLoading(true);
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin + "/app/classifier" },
+    await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/app/classifier",
     });
   };
 

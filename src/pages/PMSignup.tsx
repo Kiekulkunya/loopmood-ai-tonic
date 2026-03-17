@@ -39,9 +39,8 @@ export default function PMSignup() {
     if (pin !== "1234") { setShowPinModal(true); return; }
     sessionStorage.setItem("pm_pending", "true");
     sessionStorage.setItem("pm_pin_validated", "true");
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin + "/app/pm/log" },
+    await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/app/pm/log",
     });
   };
 
