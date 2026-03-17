@@ -58,6 +58,8 @@ const App = () => (
                   <Route path="/login/user/signup" element={<AuthRedirect><UserSignup /></AuthRedirect>} />
                   <Route path="/login/pm" element={<AuthRedirect><PMLogin /></AuthRedirect>} />
                   <Route path="/login/pm/signup" element={<AuthRedirect><PMSignup /></AuthRedirect>} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/engine" element={<EngineConfig />} />
                   {/* Protected app routes */}
                   <Route path="/app" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

@@ -91,6 +91,9 @@ export default function UserLogin() {
           </button>
 
           <p className="text-center text-sm text-muted-foreground mt-4">
+            <Link to="/forgot-password" className="text-primary hover:underline font-medium">Forgot Password?</Link>
+          </p>
+          <p className="text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
             <Link to="/login/user/signup" className="text-primary hover:underline font-medium">Sign Up</Link>
           </p>
