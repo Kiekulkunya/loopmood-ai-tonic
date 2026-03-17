@@ -742,19 +742,41 @@ function AboutSection() {
 
   return (
     <SectionCard title="About LoopAI" icon={Info}>
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div>
           <h3 className="text-2xl font-black text-foreground tracking-tight">LoopAI</h3>
           <span className="text-xs text-muted-foreground">v1.0-beta</span>
         </div>
-        <p className="text-sm text-muted-foreground">AI-Powered Startup Valuation Platform using the PWMOIC Framework</p>
+
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          LoopAI is a frontier startup valuation and analytics platform that transforms the "art" of early-stage investing into a high-fidelity science. Developed by Dr. Kiris Prayarach for TECH 41 at Stanford University, LoopAI acts as a financial flight simulator, allowing founders to navigate the turbulence of valuation through data-driven certainty.
+        </p>
+
+        <div className="space-y-3">
+          <h4 className="text-sm font-bold text-foreground">Innovative Solution: The Predictive Engine</h4>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            LoopAI moves beyond static spreadsheets by utilizing an AI-powered Multi-Variant Engine. The platform doesn't just calculate numbers; it evaluates the "DNA" of a startup across three critical layers:
+          </p>
+          <ul className="space-y-2 text-sm text-muted-foreground list-disc list-inside">
+            <li>
+              <span className="font-semibold text-foreground">The PWMOIC Framework:</span> A proprietary risk-return engine that calculates the Probability-Weighted Multiple on Invested Capital by analyzing the intersection of Market, Product, Team, and Financials.
+            </li>
+            <li>
+              <span className="font-semibold text-foreground">The TRUST Governance Model:</span> A native AI auditor ensuring every valuation is Transparent, Robust, Useful, Safe, and Traceable.
+            </li>
+            <li>
+              <span className="font-semibold text-foreground">Nova Visualization:</span> A dynamic suite of 10+ interactive chart types that translate complex AI inferences into intuitive visual narratives.
+            </li>
+          </ul>
+        </div>
+
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div><span className="text-muted-foreground">Course:</span> <span className="text-foreground">TECH 41</span></div>
           <div><span className="text-muted-foreground">University:</span> <span className="text-foreground">Stanford</span></div>
-          <div><span className="text-muted-foreground">Creator:</span> <span className="text-foreground">Dr. Kie Prayarach</span></div>
+          <div><span className="text-muted-foreground">Creator:</span> <span className="text-foreground">Dr. Kiris Prayarach</span></div>
           <div><span className="text-muted-foreground">Framework:</span> <span className="text-foreground">PWMOIC</span></div>
-          <div><span className="text-muted-foreground">Architecture:</span> <span className="text-foreground">27 components · 8 layers · 51 data flows</span></div>
         </div>
+
         <div className="flex flex-wrap gap-1.5">
           {techStack.map((t) => (
             <span key={t} className="px-2.5 py-1 bg-secondary text-muted-foreground text-[10px] font-bold rounded-lg uppercase">{t}</span>
