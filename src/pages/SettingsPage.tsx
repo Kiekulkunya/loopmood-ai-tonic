@@ -770,19 +770,6 @@ function AboutSection() {
           </ul>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div><span className="text-muted-foreground">Course:</span> <span className="text-foreground">TECH 41</span></div>
-          <div><span className="text-muted-foreground">University:</span> <span className="text-foreground">Stanford</span></div>
-          <div><span className="text-muted-foreground">Creator:</span> <span className="text-foreground">Dr. Kiris Prayarach</span></div>
-          <div><span className="text-muted-foreground">Framework:</span> <span className="text-foreground">PWMOIC</span></div>
-        </div>
-
-        <div className="flex flex-wrap gap-1.5">
-          {techStack.map((t) => (
-            <span key={t} className="px-2.5 py-1 bg-secondary text-muted-foreground text-[10px] font-bold rounded-lg uppercase">{t}</span>
-          ))}
-        </div>
-        <button onClick={() => navigate("/app/pm/architecture")} className="text-sm text-primary hover:underline">View Architecture →</button>
         <p className="text-[10px] text-muted-foreground">© 2026</p>
       </div>
     </SectionCard>
