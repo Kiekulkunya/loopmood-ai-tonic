@@ -18,6 +18,8 @@ import UserSignup from "@/pages/UserSignup";
 import PMLogin from "@/pages/PMLogin";
 import PMSignup from "@/pages/PMSignup";
 import EngineConfig from "@/pages/EngineConfig";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import StartupClassifier from "@/pages/StartupClassifier";
 import DecodedXReturn from "@/pages/DecodedXReturn";
 import RiskPWMOIC from "@/pages/RiskPWMOIC";
