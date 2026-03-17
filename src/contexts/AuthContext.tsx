@@ -47,12 +47,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return sessionStorage.getItem("pm_pin_validated") === "true";
   }, []);
 
+  const isPmPinRemembered = useCallback((userId: string) => {
+    try {
+      const remembered = JSON.parse(localStorage.getItem("pm_remembered_accounts") || "[]");
+      return remembered.includes(userId);
+    } catch { return false; }
+  }, []);
+
   const setPmPinValidated = useCallback((valid: boolean) => {
     if (valid) {
       sessionStorage.setItem("pm_pin_validated", "true");
     } else {
       sessionStorage.removeItem("pm_pin_validated");
     }
+  }, []);
+
+  const rememberPmAccount = useCallback((userId: string) => {
+    try {
+      const remembered = JSON.parse(localStorage.getItem("pm_remembered_accounts") || "[]");
+      if (!remembered.includes(userId)) {
+        remembered.push(userId);
+        localStorage.setItem("pm_remembered_accounts", JSON.stringify(remembered));
+      }
+    } catch {}
   }, []);
 
   const logActivity = useCallback(async (action: string, page: string, details?: Record<string, unknown>) => {
