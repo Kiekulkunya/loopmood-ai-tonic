@@ -48,11 +48,11 @@ const App = () => (
                   <Route path="/role" element={<Navigate to="/login" replace />} />
                   <Route path="/auth" element={<Navigate to="/login" replace />} />
                   {/* Auth routes */}
-                  <Route path="/login" element={<LoginRoleSelect />} />
-                  <Route path="/login/user" element={<UserLogin />} />
-                  <Route path="/login/user/signup" element={<UserSignup />} />
-                  <Route path="/login/pm" element={<PMLogin />} />
-                  <Route path="/login/pm/signup" element={<PMSignup />} />
+                  <Route path="/login" element={<AuthRedirect><LoginRoleSelect /></AuthRedirect>} />
+                  <Route path="/login/user" element={<AuthRedirect><UserLogin /></AuthRedirect>} />
+                  <Route path="/login/user/signup" element={<AuthRedirect><UserSignup /></AuthRedirect>} />
+                  <Route path="/login/pm" element={<AuthRedirect><PMLogin /></AuthRedirect>} />
+                  <Route path="/login/pm/signup" element={<AuthRedirect><PMSignup /></AuthRedirect>} />
                   <Route path="/engine" element={<EngineConfig />} />
                   {/* Protected app routes */}
                   <Route path="/app" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
