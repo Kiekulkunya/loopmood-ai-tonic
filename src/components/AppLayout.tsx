@@ -281,7 +281,7 @@ export default function AppLayout() {
             onNavigate={handleMobileNavigate}
             sessionTab={session}
             onSessionChange={handleSessionChange}
-            onLogout={async () => { await signOut(); navigate("/login"); }}
+            onLogout={async () => { await signOut(); navigate("/"); }}
             onSettings={() => {}}
             userName={userName}
           />
