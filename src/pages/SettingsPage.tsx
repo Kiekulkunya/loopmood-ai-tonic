@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApp } from "@/contexts/AppContext";
+import { useTheme, type Theme } from "@/contexts/ThemeContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  User, Lock, Bot, Palette, MessageSquare, Database, Info,
+  User, Lock, Key, Palette, MessageSquare, Database, Info,
   Shield, Mail, Users, Server, Workflow, Save, ExternalLink,
   Eye, EyeOff, Download, Trash2, CheckCircle2, XCircle, RefreshCw,
   ChevronDown,
@@ -14,7 +15,7 @@ import { toast } from "sonner";
 const SHARED_SECTIONS = [
   { id: "profile", label: "Profile", icon: User },
   { id: "security", label: "Password & Security", icon: Lock },
-  { id: "ai", label: "AI Configuration", icon: Bot },
+  { id: "api", label: "API Configuration", icon: Key },
   { id: "appearance", label: "Appearance", icon: Palette },
   { id: "feedback", label: "Feedback Preferences", icon: MessageSquare },
   { id: "data", label: "Data & Privacy", icon: Database },
@@ -96,7 +97,7 @@ function SectionContent({ section }: { section: string }) {
   switch (section) {
     case "profile": return <ProfileSection />;
     case "security": return <SecuritySection />;
-    case "ai": return <AIConfigSection />;
+    case "api": return <APIConfigSection />;
     case "appearance": return <AppearanceSection />;
     case "feedback": return <FeedbackSection />;
     case "data": return <DataPrivacySection />;
@@ -126,7 +127,7 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   return <label className="block text-sm font-medium text-muted-foreground mb-1.5">{children}</label>;
 }
 
-function InputField({ value, onChange, disabled, type = "text", placeholder, className = "" }: any) {
+function InputField({ value, onChange, disabled, type = "text", placeholder, className = "", ...rest }: any) {
   return (
     <input
       type={type}
@@ -135,6 +136,7 @@ function InputField({ value, onChange, disabled, type = "text", placeholder, cla
       disabled={disabled}
       placeholder={placeholder}
       className={`w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all ${className}`}
+      {...rest}
     />
   );
 }
@@ -272,38 +274,238 @@ function SecuritySection() {
   );
 }
 
-// ═══ AI CONFIGURATION ═══
-function AIConfigSection() {
-  const { provider, setProvider } = useApp();
+// ═══ API CONFIGURATION ═══
+function APIConfigSection() {
+  const { isPM } = useAuth();
+  const { provider, setProvider, apiKey, setApiKey } = useApp();
+
+  const [aiMode, setAiMode] = useState<"mock" | "ai">(() =>
+    (sessionStorage.getItem("ai_mode") as "mock" | "ai") || "mock"
+  );
+  const [defaultProvider, setDefaultProvider] = useState(() =>
+    sessionStorage.getItem("ai_default_provider") || "gemini"
+  );
+  const [geminiKey, setGeminiKey] = useState(() => sessionStorage.getItem("api_key_gemini") || "");
+  const [openaiKey, setOpenaiKey] = useState(() => sessionStorage.getItem("api_key_openai") || "");
+  const [claudeKey, setClaudeKey] = useState(() => sessionStorage.getItem("api_key_claude") || "");
   const [temp, setTemp] = useState(() => parseFloat(sessionStorage.getItem("ai_temperature") || "0.7"));
 
+  const [showGemini, setShowGemini] = useState(false);
+  const [showOpenai, setShowOpenai] = useState(false);
+  const [showClaude, setShowClaude] = useState(false);
+
+  const [testStatus, setTestStatus] = useState<Record<string, "idle" | "ok" | "error" | "testing">>({
+    gemini: "idle", openai: "idle", claude: "idle",
+  });
+
+  const testGemini = async () => {
+    setTestStatus(s => ({ ...s, gemini: "testing" }));
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiKey}`);
+      setTestStatus(s => ({ ...s, gemini: res.ok ? "ok" : "error" }));
+    } catch { setTestStatus(s => ({ ...s, gemini: "error" })); }
+  };
+
+  const testOpenai = async () => {
+    setTestStatus(s => ({ ...s, openai: "testing" }));
+    try {
+      const res = await fetch("https://api.openai.com/v1/models", {
+        headers: { Authorization: `Bearer ${openaiKey}` },
+      });
+      setTestStatus(s => ({ ...s, openai: res.ok ? "ok" : "error" }));
+    } catch { setTestStatus(s => ({ ...s, openai: "error" })); }
+  };
+
+  const testClaude = async () => {
+    setTestStatus(s => ({ ...s, claude: "testing" }));
+    const valid = claudeKey.startsWith("sk-ant-") && claudeKey.length > 20;
+    setTestStatus(s => ({ ...s, claude: valid ? "ok" : "error" }));
+  };
+
+  const statusIcon = (s: string) => {
+    if (s === "ok") return <CheckCircle2 size={14} className="text-accent" />;
+    if (s === "error") return <XCircle size={14} className="text-destructive" />;
+    if (s === "testing") return <RefreshCw size={14} className="text-primary animate-spin" />;
+    return <span className="text-muted-foreground text-xs">——</span>;
+  };
+
+  const handleSave = () => {
+    sessionStorage.setItem("ai_mode", aiMode);
+    sessionStorage.setItem("ai_default_provider", defaultProvider);
+    sessionStorage.setItem("api_key_gemini", geminiKey);
+    sessionStorage.setItem("api_key_openai", openaiKey);
+    sessionStorage.setItem("api_key_claude", claudeKey);
+    sessionStorage.setItem("ai_temperature", temp.toString());
+    setProvider(aiMode === "mock" ? "mock" : defaultProvider);
+    setApiKey(aiMode === "mock" ? "" : geminiKey || openaiKey || claudeKey);
+    toast.success("API configuration saved for this session");
+  };
+
   return (
-    <SectionCard title="AI Configuration" icon={Bot}>
+    <SectionCard title="API Configuration" icon={Key}>
+      {/* Mode Toggle */}
       <div>
-        <FieldLabel>Default AI Provider</FieldLabel>
-        <select value={provider} onChange={(e) => setProvider(e.target.value as any)} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
-          <option value="gemini">Gemini 2.0 Flash (Primary)</option>
-          <option value="openai">OpenAI GPT-4o-mini (Fallback)</option>
-          <option value="claude">Claude Sonnet (Deep Analysis)</option>
-          <option value="mock">Mock Mode (No API needed)</option>
-        </select>
-      </div>
-      <div>
-        <FieldLabel>Model Temperature: {temp.toFixed(1)}</FieldLabel>
-        <input type="range" min="0" max="1" step="0.1" value={temp} onChange={(e) => { setTemp(parseFloat(e.target.value)); sessionStorage.setItem("ai_temperature", e.target.value); }} className="w-full accent-primary" />
-        <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-          <span>Precise (0.0)</span><span>Creative (1.0)</span>
+        <FieldLabel>Default Mode</FieldLabel>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => setAiMode("mock")}
+            className={`p-4 rounded-xl border-2 text-left transition-all ${
+              aiMode === "mock"
+                ? "border-primary ring-2 ring-primary/20 bg-primary/5"
+                : "border-border hover:border-muted-foreground"
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <div className={`w-3 h-3 rounded-full border-2 ${aiMode === "mock" ? "border-primary bg-primary" : "border-muted-foreground"}`}>
+                {aiMode === "mock" && <div className="w-1 h-1 bg-primary-foreground rounded-full m-auto mt-[2px]" />}
+              </div>
+              <span className="text-sm font-bold text-foreground">Mock Mode</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground ml-5">No API keys needed — uses sample data for all features</p>
+          </button>
+          <button
+            onClick={() => setAiMode("ai")}
+            className={`p-4 rounded-xl border-2 text-left transition-all ${
+              aiMode === "ai"
+                ? "border-primary ring-2 ring-primary/20 bg-primary/5"
+                : "border-border hover:border-muted-foreground"
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <div className={`w-3 h-3 rounded-full border-2 ${aiMode === "ai" ? "border-primary bg-primary" : "border-muted-foreground"}`}>
+                {aiMode === "ai" && <div className="w-1 h-1 bg-primary-foreground rounded-full m-auto mt-[2px]" />}
+              </div>
+              <span className="text-sm font-bold text-foreground">AI Mode</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground ml-5">Requires API keys — connects to real AI providers</p>
+          </button>
         </div>
       </div>
+
+      {aiMode === "ai" && (
+        <>
+          {/* Provider Dropdown */}
+          <div>
+            <FieldLabel>Default AI Provider</FieldLabel>
+            <select
+              value={defaultProvider}
+              onChange={(e) => setDefaultProvider(e.target.value)}
+              className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            >
+              <option value="gemini">Gemini 2.0 Flash (Primary)</option>
+              <option value="openai">OpenAI GPT-4o-mini (Fallback)</option>
+              {isPM && <option value="claude">Claude Sonnet (Deep Analysis)</option>}
+              <option value="auto">Auto (Gemini → OpenAI → Claude)</option>
+            </select>
+          </div>
+
+          {/* API Keys */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest border-b border-border pb-2">API Keys</h3>
+
+            {/* Gemini */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <FieldLabel>Gemini API Key</FieldLabel>
+                <span className="text-[9px] font-bold text-primary uppercase">Required</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <InputField
+                    type={showGemini ? "text" : "password"}
+                    value={geminiKey}
+                    onChange={(e: any) => setGeminiKey(e.target.value)}
+                    placeholder="AIza..."
+                  />
+                  <button onClick={() => setShowGemini(!showGemini)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    {showGemini ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+                <button onClick={testGemini} disabled={!geminiKey} className="px-3 py-2.5 bg-secondary text-foreground rounded-xl text-xs hover:bg-secondary/80 disabled:opacity-40 transition-colors">
+                  Test
+                </button>
+                {statusIcon(testStatus.gemini)}
+              </div>
+            </div>
+
+            {/* OpenAI */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <FieldLabel>OpenAI API Key</FieldLabel>
+                <span className="text-[9px] font-bold text-muted-foreground uppercase">Optional</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <InputField
+                    type={showOpenai ? "text" : "password"}
+                    value={openaiKey}
+                    onChange={(e: any) => setOpenaiKey(e.target.value)}
+                    placeholder="sk-..."
+                  />
+                  <button onClick={() => setShowOpenai(!showOpenai)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    {showOpenai ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+                <button onClick={testOpenai} disabled={!openaiKey} className="px-3 py-2.5 bg-secondary text-foreground rounded-xl text-xs hover:bg-secondary/80 disabled:opacity-40 transition-colors">
+                  Test
+                </button>
+                {statusIcon(testStatus.openai)}
+              </div>
+            </div>
+
+            {/* Claude - PM only */}
+            {isPM && (
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <FieldLabel>Claude API Key</FieldLabel>
+                  <span className="text-[9px] font-bold text-muted-foreground uppercase">Optional (PM only)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <InputField
+                      type={showClaude ? "text" : "password"}
+                      value={claudeKey}
+                      onChange={(e: any) => setClaudeKey(e.target.value)}
+                      placeholder="sk-ant-..."
+                    />
+                    <button onClick={() => setShowClaude(!showClaude)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      {showClaude ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  </div>
+                  <button onClick={testClaude} disabled={!claudeKey} className="px-3 py-2.5 bg-secondary text-foreground rounded-xl text-xs hover:bg-secondary/80 disabled:opacity-40 transition-colors">
+                    Test
+                  </button>
+                  {statusIcon(testStatus.claude)}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Temperature */}
+          <div>
+            <FieldLabel>Model Temperature: {temp.toFixed(1)}</FieldLabel>
+            <input type="range" min="0" max="1" step="0.1" value={temp} onChange={(e) => setTemp(parseFloat(e.target.value))} className="w-full accent-primary" />
+            <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+              <span>Precise (0.0)</span><span>Creative (1.0)</span>
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="p-3 bg-warning/10 border border-warning/20 rounded-xl">
-        <p className="text-xs text-warning">⚠️ API keys are stored in memory only for this session. They will be cleared when you close the browser.</p>
+        <p className="text-xs text-warning">⚠️ API keys are stored in memory only for this session. They are never saved to servers and will be cleared when you close the browser.</p>
       </div>
+
+      <button onClick={handleSave} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors">
+        <Save size={14} />Save Configuration
+      </button>
     </SectionCard>
   );
 }
 
 // ═══ APPEARANCE ═══
 function AppearanceSection() {
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const [fontSize, setFontSize] = useState(() => localStorage.getItem("loopai_fontsize") || "medium");
   const [density, setDensity] = useState(() => localStorage.getItem("loopai_density") || "comfortable");
 
@@ -312,8 +514,109 @@ function AppearanceSection() {
     toast.success("Preference saved");
   };
 
+  const themes: { id: Theme; label: string; icon: string; desc: string; preview: { bg: string; card: string; border: string; text: string } | null }[] = [
+    {
+      id: "light",
+      label: "Light",
+      icon: "☀️",
+      desc: "Clean white backgrounds",
+      preview: { bg: "#F8FAFC", card: "#FFFFFF", border: "#E2E8F0", text: "#0F172A" },
+    },
+    {
+      id: "dark",
+      label: "Dark",
+      icon: "🌙",
+      desc: "Default dark professional",
+      preview: { bg: "#0B0F19", card: "#111827", border: "#1E293B", text: "#F1F5F9" },
+    },
+    {
+      id: "system",
+      label: "System",
+      icon: "💻",
+      desc: "Follows your OS preference",
+      preview: null,
+    },
+  ];
+
   return (
     <SectionCard title="Appearance" icon={Palette}>
+      {/* Theme Mode */}
+      <div>
+        <h3 className="text-sm font-bold text-foreground mb-1">Theme Mode</h3>
+        <p className="text-[10px] text-muted-foreground mb-4">Choose your preferred appearance. System mode automatically matches your device settings.</p>
+
+        <div className="grid grid-cols-3 gap-3">
+          {themes.map((t) => (
+            <div
+              key={t.id}
+              onClick={() => setTheme(t.id)}
+              className={`cursor-pointer rounded-xl border-2 p-4 transition-all duration-300 bg-card ${
+                theme === t.id
+                  ? "border-primary ring-2 ring-primary/20 scale-[1.02]"
+                  : "border-border hover:border-muted-foreground"
+              }`}
+            >
+              {t.preview ? (
+                <div
+                  className="rounded-lg p-2 mb-3 border"
+                  style={{ backgroundColor: t.preview.bg, borderColor: t.preview.border }}
+                >
+                  <div className="h-2 w-12 rounded mb-1" style={{ backgroundColor: t.preview.text, opacity: 0.7 }} />
+                  <div className="flex gap-1">
+                    <div className="h-6 flex-1 rounded" style={{ backgroundColor: t.preview.card, border: `1px solid ${t.preview.border}` }} />
+                    <div className="h-6 flex-1 rounded" style={{ backgroundColor: t.preview.card, border: `1px solid ${t.preview.border}` }} />
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-lg p-2 mb-3 border border-border overflow-hidden">
+                  <div className="flex h-8 rounded overflow-hidden">
+                    <div className="flex-1" style={{ backgroundColor: "#F8FAFC" }}>
+                      <div className="h-2 w-6 rounded m-1" style={{ backgroundColor: "#0F172A", opacity: 0.5 }} />
+                    </div>
+                    <div className="flex-1" style={{ backgroundColor: "#0B0F19" }}>
+                      <div className="h-2 w-6 rounded m-1" style={{ backgroundColor: "#F1F5F9", opacity: 0.5 }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="text-center">
+                <div className="text-lg mb-1">{t.icon}</div>
+                <div className="text-xs font-bold text-foreground">{t.label}</div>
+                <div className="text-[9px] text-muted-foreground mt-0.5">{t.desc}</div>
+              </div>
+
+              {theme === t.id && (
+                <div className="flex items-center justify-center mt-2">
+                  <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                    <span className="text-primary-foreground text-[8px]">✓</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Current theme info */}
+      <div className="p-3 rounded-lg border border-border bg-secondary">
+        <div className="flex items-center gap-2">
+          <span className="text-sm">{theme === "system" ? (resolvedTheme === "dark" ? "🌙" : "☀️") : themes.find(t => t.id === theme)?.icon}</span>
+          <div>
+            <div className="text-[11px] font-semibold text-foreground">
+              Currently using: {resolvedTheme === "dark" ? "Dark" : "Light"} theme
+              {theme === "system" && " (auto-detected from your OS)"}
+            </div>
+            <div className="text-[9px] text-muted-foreground">
+              {theme === "system"
+                ? "Theme will change automatically when your OS switches between light and dark mode"
+                : `Manually set to ${theme} mode`}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Font Size */}
       <div>
         <FieldLabel>Font Size</FieldLabel>
         <div className="flex gap-2">
@@ -324,6 +627,8 @@ function AppearanceSection() {
           ))}
         </div>
       </div>
+
+      {/* Layout Density */}
       <div>
         <FieldLabel>Layout Density</FieldLabel>
         <div className="flex gap-2">
@@ -333,12 +638,6 @@ function AppearanceSection() {
             </button>
           ))}
         </div>
-      </div>
-      <div className="p-4 bg-background border border-border rounded-xl">
-        <p className="text-muted-foreground text-xs mb-2">Preview</p>
-        <p className={`text-foreground ${fontSize === "small" ? "text-xs" : fontSize === "large" ? "text-base" : "text-sm"}`}>
-          This is how your text will appear with current settings.
-        </p>
       </div>
     </SectionCard>
   );
@@ -473,8 +772,6 @@ function PMSecuritySection() {
   const [showPin, setShowPin] = useState(false);
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
-
-  const currentPin = localStorage.getItem("pm_custom_pin") || "1234";
 
   const updatePin = () => {
     if (newPin.length !== 4) { toast.error("PIN must be 4 digits"); return; }
@@ -630,12 +927,10 @@ function PMHealthSection() {
 
   const checkHealth = async () => {
     setStatus({ database: "checking", ai: "checking", edge: "checking" });
-    // Check database
     try {
       await supabase.from("activity_logs").select("count", { count: "exact", head: true });
       setStatus(s => ({ ...s, database: "ok" }));
     } catch { setStatus(s => ({ ...s, database: "error" })); }
-    // AI & Edge are mock checks for prototype
     setTimeout(() => setStatus(s => ({ ...s, ai: "ok", edge: "ok" })), 1000);
   };
 
@@ -705,13 +1000,13 @@ function PMArchSection() {
       <div className="flex items-center justify-between">
         <span className="text-sm text-foreground">Auto-Refresh Arrows</span>
         <button onClick={() => setAutoRefresh(!autoRefresh)} className={`w-10 h-6 rounded-full transition-colors ${autoRefresh ? "bg-primary" : "bg-secondary"}`}>
-          <div className={`w-4 h-4 bg-white rounded-full transition-transform mx-1 ${autoRefresh ? "translate-x-4" : ""}`} />
+          <div className={`w-4 h-4 bg-primary-foreground rounded-full transition-transform mx-1 ${autoRefresh ? "translate-x-4" : ""}`} />
         </button>
       </div>
       <div className="flex items-center justify-between">
         <span className="text-sm text-foreground">Show Connection Labels</span>
         <button onClick={() => setShowLabels(!showLabels)} className={`w-10 h-6 rounded-full transition-colors ${showLabels ? "bg-primary" : "bg-secondary"}`}>
-          <div className={`w-4 h-4 bg-white rounded-full transition-transform mx-1 ${showLabels ? "translate-x-4" : ""}`} />
+          <div className={`w-4 h-4 bg-primary-foreground rounded-full transition-transform mx-1 ${showLabels ? "translate-x-4" : ""}`} />
         </button>
       </div>
       <div className="flex gap-3">
