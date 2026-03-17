@@ -7,6 +7,7 @@ import { AppProvider } from "@/contexts/AppContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ValuationProvider } from "@/contexts/ValuationContext";
 import { DisplayProvider } from "@/contexts/DisplayContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AuthRedirect from "@/components/AuthRedirect";
 import AppLayout from "@/components/AppLayout";
