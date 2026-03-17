@@ -15,6 +15,8 @@ interface AuthContextType extends AuthState {
   signOut: () => Promise<void>;
   setPmPinValidated: (valid: boolean) => void;
   isPmPinValidated: () => boolean;
+  isPmPinRemembered: (userId: string) => boolean;
+  rememberPmAccount: (userId: string) => void;
   logActivity: (action: string, page: string, details?: Record<string, unknown>) => Promise<void>;
 }
 
