@@ -55,6 +55,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/app/pm/dashboard": "PM Dashboard",
   "/app/pm/architecture": "LoopAI Architecture",
   "/app/pm/email": "Email Report Automation",
+  "/app/settings": "Settings",
 };
 
 // Map MobileNav page IDs to routes
