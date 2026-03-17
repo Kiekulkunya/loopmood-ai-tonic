@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { UserPlus, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import PinModal from "@/components/PinModal";
 
 export default function PMSignup() {
@@ -38,9 +39,8 @@ export default function PMSignup() {
     if (pin !== "1234") { setShowPinModal(true); return; }
     sessionStorage.setItem("pm_pending", "true");
     sessionStorage.setItem("pm_pin_validated", "true");
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin + "/app/pm/log" },
+    await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/app/pm/log",
     });
   };
 

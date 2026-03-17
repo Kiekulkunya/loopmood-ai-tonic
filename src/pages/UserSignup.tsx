@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { UserPlus, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 
 export default function UserSignup() {
   const [name, setName] = useState("");
@@ -31,9 +32,8 @@ export default function UserSignup() {
 
   const handleGoogle = async () => {
     setLoading(true);
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin + "/app/classifier" },
+    await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/app/classifier",
     });
   };
 
