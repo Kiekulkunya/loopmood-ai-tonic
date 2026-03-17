@@ -21,6 +21,7 @@ import {
 import { ChatbotFAB } from "@/components/Chatbot";
 import ToastContainer from "@/components/ToastContainer";
 import { useApp } from "@/contexts/AppContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useDisplay } from "@/contexts/DisplayContext";
 import DisplayModeSelector from "./DisplayModeSelector";
 import MobileNav from "./MobileNav";
