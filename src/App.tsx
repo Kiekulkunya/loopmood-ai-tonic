@@ -18,6 +18,8 @@ import UserSignup from "@/pages/UserSignup";
 import PMLogin from "@/pages/PMLogin";
 import PMSignup from "@/pages/PMSignup";
 import EngineConfig from "@/pages/EngineConfig";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import StartupClassifier from "@/pages/StartupClassifier";
 import DecodedXReturn from "@/pages/DecodedXReturn";
 import RiskPWMOIC from "@/pages/RiskPWMOIC";
@@ -56,6 +58,8 @@ const App = () => (
                   <Route path="/login/user/signup" element={<AuthRedirect><UserSignup /></AuthRedirect>} />
                   <Route path="/login/pm" element={<AuthRedirect><PMLogin /></AuthRedirect>} />
                   <Route path="/login/pm/signup" element={<AuthRedirect><PMSignup /></AuthRedirect>} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/engine" element={<EngineConfig />} />
                   {/* Protected app routes */}
                   <Route path="/app" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

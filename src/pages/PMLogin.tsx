@@ -120,6 +120,9 @@ export default function PMLogin() {
           </button>
 
           <p className="text-center text-sm text-muted-foreground mt-4">
+            <Link to="/forgot-password" className="text-accent hover:underline font-medium">Forgot Password?</Link>
+          </p>
+          <p className="text-center text-sm text-muted-foreground">
             Don't have an account? <Link to="/login/pm/signup" className="text-accent hover:underline font-medium">Sign Up</Link>
           </p>
         </div>
