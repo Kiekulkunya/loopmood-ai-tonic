@@ -81,10 +81,14 @@ export default function AppLayout() {
   const [session, setSession] = useState<"user" | "pm">("user");
   const location = useLocation();
   const navigate = useNavigate();
-  const { provider, logAct, role, addToast } = useApp();
+  const { provider, logAct, addToast } = useApp();
+  const { user, isPM, role, signOut } = useAuth();
   const { containerWidth, sidebarVisible, compactMode, fontSize } = useDisplay();
 
-  const isPM = role === "pm";
+  const userInitials = user?.user_metadata?.full_name
+    ? user.user_metadata.full_name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+    : user?.email?.slice(0, 2).toUpperCase() || "U";
+  const userName = user?.user_metadata?.full_name || user?.email || "User";
   const navItems = session === "user" ? USER_NAV : PM_NAV;
   const pageTitle = PAGE_TITLES[location.pathname] || "LoopAI";
   const currentPageId = PATH_TO_PAGE_ID[location.pathname] || "classifier";
