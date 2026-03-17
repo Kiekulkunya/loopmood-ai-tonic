@@ -24,7 +24,10 @@ export default function LoginRoleSelect() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 relative">
+      <button onClick={() => navigate("/")} className="absolute top-6 left-6 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <ArrowLeft size={16} /> Back
+      </button>
       <div className="max-w-md w-full space-y-10">
         <div className="text-center space-y-2">
           <h2 className="text-4xl font-bold tracking-tight">Access Control</h2>
