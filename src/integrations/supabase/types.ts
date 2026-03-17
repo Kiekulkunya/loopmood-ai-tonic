@@ -44,6 +44,99 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_reviews: {
+        Row: {
+          ai_enhanced: boolean | null
+          avatar_url: string | null
+          created_at: string | null
+          enhanced_text: string | null
+          feature_id: string
+          helpful_count: number | null
+          id: string
+          not_helpful_count: number | null
+          rating: number
+          review_text: string
+          sentiment: string | null
+          title: string
+          updated_at: string | null
+          user_email: string
+          user_id: string | null
+          user_name: string
+          user_role: string | null
+        }
+        Insert: {
+          ai_enhanced?: boolean | null
+          avatar_url?: string | null
+          created_at?: string | null
+          enhanced_text?: string | null
+          feature_id?: string
+          helpful_count?: number | null
+          id?: string
+          not_helpful_count?: number | null
+          rating: number
+          review_text: string
+          sentiment?: string | null
+          title?: string
+          updated_at?: string | null
+          user_email: string
+          user_id?: string | null
+          user_name?: string
+          user_role?: string | null
+        }
+        Update: {
+          ai_enhanced?: boolean | null
+          avatar_url?: string | null
+          created_at?: string | null
+          enhanced_text?: string | null
+          feature_id?: string
+          helpful_count?: number | null
+          id?: string
+          not_helpful_count?: number | null
+          rating?: number
+          review_text?: string
+          sentiment?: string | null
+          title?: string
+          updated_at?: string | null
+          user_email?: string
+          user_id?: string | null
+          user_name?: string
+          user_role?: string | null
+        }
+        Relationships: []
+      }
+      feedback_surveys: {
+        Row: {
+          comments: string | null
+          created_at: string | null
+          feature_rankings: Json | null
+          id: string
+          nps_score: number | null
+          satisfaction: number | null
+          user_email: string
+          user_id: string | null
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string | null
+          feature_rankings?: Json | null
+          id?: string
+          nps_score?: number | null
+          satisfaction?: number | null
+          user_email: string
+          user_id?: string | null
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string | null
+          feature_rankings?: Json | null
+          id?: string
+          nps_score?: number | null
+          satisfaction?: number | null
+          user_email?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
