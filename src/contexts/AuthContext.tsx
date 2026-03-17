@@ -151,7 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...state, signOut, setPmPinValidated, isPmPinValidated, logActivity }}>
+    <AuthContext.Provider value={{ ...state, signOut, setPmPinValidated, isPmPinValidated, isPmPinRemembered, rememberPmAccount, logActivity }}>
       {children}
     </AuthContext.Provider>
   );
