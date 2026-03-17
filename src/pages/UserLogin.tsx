@@ -99,11 +99,6 @@ export default function UserLogin() {
           </p>
         </div>
 
-        <div className="mt-8 p-4 bg-primary/5 border border-primary/10 rounded-2xl">
-          <p className="text-[11px] text-primary leading-relaxed text-center">
-            Your data is stored in memory only for this session. It is never saved to our servers and will be cleared when you close the browser.
-          </p>
-        </div>
       </div>
     </div>
   );
