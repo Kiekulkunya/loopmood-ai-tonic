@@ -166,6 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     sessionStorage.removeItem("pm_pin_validated");
     sessionStorage.removeItem("pm_pending");
+    sessionStorage.removeItem("user_pending");
     setState({
       user: null,
       session: null,
