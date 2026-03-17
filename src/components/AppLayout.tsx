@@ -21,6 +21,7 @@ import {
 import { ChatbotFAB } from "@/components/Chatbot";
 import ToastContainer from "@/components/ToastContainer";
 import { useApp } from "@/contexts/AppContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useDisplay } from "@/contexts/DisplayContext";
 import DisplayModeSelector from "./DisplayModeSelector";
 import MobileNav from "./MobileNav";
@@ -80,10 +81,14 @@ export default function AppLayout() {
   const [session, setSession] = useState<"user" | "pm">("user");
   const location = useLocation();
   const navigate = useNavigate();
-  const { provider, logAct, role, addToast } = useApp();
+  const { provider, logAct, addToast } = useApp();
+  const { user, isPM, role, signOut } = useAuth();
   const { containerWidth, sidebarVisible, compactMode, fontSize } = useDisplay();
 
-  const isPM = role === "pm";
+  const userInitials = user?.user_metadata?.full_name
+    ? user.user_metadata.full_name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+    : user?.email?.slice(0, 2).toUpperCase() || "U";
+  const userName = user?.user_metadata?.full_name || user?.email || "User";
   const navItems = session === "user" ? USER_NAV : PM_NAV;
   const pageTitle = PAGE_TITLES[location.pathname] || "LoopAI";
   const currentPageId = PATH_TO_PAGE_ID[location.pathname] || "classifier";
@@ -203,18 +208,33 @@ export default function AppLayout() {
               })}
             </nav>
 
-            {/* Bottom */}
-            <div className="border-t border-border p-2 space-y-0.5">
+            {/* Bottom — User info + Sign Out */}
+            <div className="border-t border-border p-2 space-y-1">
+              {!collapsed && (
+                <div className="flex items-center gap-2.5 px-2.5 py-2">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                    {userInitials}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium text-foreground truncate">{userName}</div>
+                    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                      isPM ? "bg-accent/15 text-accent" : "bg-primary/15 text-primary"
+                    }`}>
+                      {isPM ? "PM" : "USER"}
+                    </span>
+                  </div>
+                </div>
+              )}
               <button className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
                 <Settings size={16} className="shrink-0" />
                 {!collapsed && <span>Settings</span>}
               </button>
               <button
-                onClick={() => navigate("/")}
+                onClick={async () => { await signOut(); navigate("/login"); }}
                 className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-destructive transition-colors"
               >
                 <LogOut size={16} className="shrink-0" />
-                {!collapsed && <span>Logout</span>}
+                {!collapsed && <span>Sign Out</span>}
               </button>
             </div>
           </aside>
@@ -261,9 +281,9 @@ export default function AppLayout() {
             onNavigate={handleMobileNavigate}
             sessionTab={session}
             onSessionChange={handleSessionChange}
-            onLogout={() => navigate("/")}
+            onLogout={async () => { await signOut(); navigate("/login"); }}
             onSettings={() => {}}
-            userName="User"
+            userName={userName}
           />
         )}
 
