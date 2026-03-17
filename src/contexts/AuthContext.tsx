@@ -15,6 +15,8 @@ interface AuthContextType extends AuthState {
   signOut: () => Promise<void>;
   setPmPinValidated: (valid: boolean) => void;
   isPmPinValidated: () => boolean;
+  isPmPinRemembered: (userId: string) => boolean;
+  rememberPmAccount: (userId: string) => void;
   logActivity: (action: string, page: string, details?: Record<string, unknown>) => Promise<void>;
 }
 
@@ -47,12 +49,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return sessionStorage.getItem("pm_pin_validated") === "true";
   }, []);
 
+  const isPmPinRemembered = useCallback((userId: string) => {
+    try {
+      const remembered = JSON.parse(localStorage.getItem("pm_remembered_accounts") || "[]");
+      return remembered.includes(userId);
+    } catch { return false; }
+  }, []);
+
   const setPmPinValidated = useCallback((valid: boolean) => {
     if (valid) {
       sessionStorage.setItem("pm_pin_validated", "true");
     } else {
       sessionStorage.removeItem("pm_pin_validated");
     }
+  }, []);
+
+  const rememberPmAccount = useCallback((userId: string) => {
+    try {
+      const remembered = JSON.parse(localStorage.getItem("pm_remembered_accounts") || "[]");
+      if (!remembered.includes(userId)) {
+        remembered.push(userId);
+        localStorage.setItem("pm_remembered_accounts", JSON.stringify(remembered));
+      }
+    } catch {}
   }, []);
 
   const logActivity = useCallback(async (action: string, page: string, details?: Record<string, unknown>) => {
@@ -77,17 +96,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user && sessionStorage.getItem("pm_pending") === "true") {
         sessionStorage.removeItem("pm_pending");
         sessionStorage.setItem("pm_pin_validated", "true");
-        // Update user metadata role to pm
+        // Remember this account for future logins
+        try {
+          const remembered = JSON.parse(localStorage.getItem("pm_remembered_accounts") || "[]");
+          if (!remembered.includes(user.id)) {
+            remembered.push(user.id);
+            localStorage.setItem("pm_remembered_accounts", JSON.stringify(remembered));
+          }
+        } catch {}
         supabase.auth.updateUser({ data: { role: "pm" } });
         setState({
-          user,
-          session,
-          role: "pm",
-          isAuthenticated: true,
-          isPM: true,
-          isLoading: false,
+          user, session, role: "pm", isAuthenticated: true, isPM: true, isLoading: false,
         });
         return;
+      }
+
+      // Auto-validate remembered PM accounts (returning Google OAuth users)
+      if (user && role === "pm") {
+        try {
+          const remembered = JSON.parse(localStorage.getItem("pm_remembered_accounts") || "[]");
+          if (remembered.includes(user.id)) {
+            sessionStorage.setItem("pm_pin_validated", "true");
+            setState({
+              user, session, role: "pm", isAuthenticated: true, isPM: true, isLoading: false,
+            });
+            return;
+          }
+        } catch {}
       }
 
       setState({
@@ -132,7 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...state, signOut, setPmPinValidated, isPmPinValidated, logActivity }}>
+    <AuthContext.Provider value={{ ...state, signOut, setPmPinValidated, isPmPinValidated, isPmPinRemembered, rememberPmAccount, logActivity }}>
       {children}
     </AuthContext.Provider>
   );

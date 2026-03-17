@@ -28,6 +28,7 @@ import PMDashboard from "@/pages/PMDashboard";
 import PMArchitecture from "@/pages/PMArchitecture";
 import PMEmailAutomation from "@/pages/PMEmailAutomation";
 import CustomerFeedback from "@/pages/CustomerFeedback";
+import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const App = () => (
                     <Route path="pm/dashboard" element={<PMDashboard />} />
                     <Route path="pm/architecture" element={<PMArchitecture />} />
                     <Route path="pm/email" element={<PMEmailAutomation />} />
+                    <Route path="settings" element={<SettingsPage />} />
                   </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>

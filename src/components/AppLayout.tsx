@@ -55,6 +55,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/app/pm/dashboard": "PM Dashboard",
   "/app/pm/architecture": "LoopAI Architecture",
   "/app/pm/email": "Email Report Automation",
+  "/app/settings": "Settings",
 };
 
 // Map MobileNav page IDs to routes
@@ -225,12 +226,19 @@ export default function AppLayout() {
                   </div>
                 </div>
               )}
-              <button className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+              <button
+                onClick={() => navigate("/app/settings")}
+                className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
+                  location.pathname === "/app/settings"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                }`}
+              >
                 <Settings size={16} className="shrink-0" />
                 {!collapsed && <span>Settings</span>}
               </button>
               <button
-                onClick={async () => { await signOut(); navigate("/login"); }}
+                onClick={async () => { await signOut(); navigate("/"); }}
                 className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-destructive transition-colors"
               >
                 <LogOut size={16} className="shrink-0" />
@@ -281,7 +289,7 @@ export default function AppLayout() {
             onNavigate={handleMobileNavigate}
             sessionTab={session}
             onSessionChange={handleSessionChange}
-            onLogout={async () => { await signOut(); navigate("/login"); }}
+            onLogout={async () => { await signOut(); navigate("/"); }}
             onSettings={() => {}}
             userName={userName}
           />
