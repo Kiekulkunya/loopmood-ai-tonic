@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Star, Send, Sparkles, MessageSquare, ThumbsUp, ThumbsDown,
   ChevronDown, ChevronUp, Filter, Clock, User,
@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useApp, type CustomerReview } from "@/contexts/AppContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 const FEATURES = [
   { id: "classifier", name: "Startup Classifier", icon: FlaskConical, color: "#3B82F6", desc: "AI-powered startup stage classification from articles, URLs, and documents" },
   { id: "decoded", name: "Decoded X Return", icon: TrendingUp, color: "#06B6D4", desc: "M×P×T×F risk framework with 7-scenario probability analysis" },
@@ -139,8 +141,53 @@ function ReviewCard({ review }: { review: CustomerReview }) {
 
 export default function CustomerFeedback() {
   const { logAct, customerReviews, addCustomerReview } = useApp();
+  const { user } = useAuth();
 
-  const allReviews = useMemo(() => [...customerReviews, ...SEED_REVIEWS], [customerReviews]);
+  const [dbReviews, setDbReviews] = useState<CustomerReview[]>([]);
+  const [loadingDb, setLoadingDb] = useState(true);
+
+  // Load reviews from database on mount
+  useEffect(() => {
+    async function loadReviews() {
+      try {
+        const { data, error } = await supabase
+          .from("customer_reviews")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (data && !error) {
+          const mapped: CustomerReview[] = data.map((r: any) => ({
+            id: r.id,
+            featureId: r.feature_id,
+            userName: r.user_name,
+            userEmail: r.user_email,
+            rating: r.rating,
+            title: r.title,
+            comment: r.enhanced_text || r.review_text,
+            aiEnhanced: r.ai_enhanced || false,
+            helpful: r.helpful_count || 0,
+            notHelpful: r.not_helpful_count || 0,
+            createdAt: r.created_at,
+            sentiment: r.sentiment as CustomerReview["sentiment"],
+            userRole: r.user_role || "User",
+          }));
+          setDbReviews(mapped);
+          localStorage.setItem("loopai_reviews", JSON.stringify(mapped));
+        } else {
+          // Fallback to localStorage
+          const cached = localStorage.getItem("loopai_reviews");
+          if (cached) setDbReviews(JSON.parse(cached));
+        }
+      } catch {
+        const cached = localStorage.getItem("loopai_reviews");
+        if (cached) setDbReviews(JSON.parse(cached));
+      }
+      setLoadingDb(false);
+    }
+    loadReviews();
+  }, []);
+
+  const allReviews = useMemo(() => [...customerReviews, ...dbReviews, ...SEED_REVIEWS], [customerReviews, dbReviews]);
   const [activeFeature, setActiveFeature] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"recent" | "rating" | "helpful">("recent");
 
@@ -182,35 +229,114 @@ export default function CustomerFeedback() {
     }, 1200);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (formRating === 0) { toast.error("Please select a star rating"); return; }
     if (!formTitle.trim()) { toast.error("Please add a review title"); return; }
     if (!formComment.trim()) { toast.error("Please write a comment"); return; }
 
     const sentiment: CustomerReview["sentiment"] = formRating >= 4 ? "positive" : formRating >= 3 ? "neutral" : "negative";
-    const newReview: CustomerReview = {
-      id: `r-${Date.now()}`,
-      featureId: formFeature,
-      userName: "Anonymous User",
-      userEmail: "user@loopai.app",
-      rating: formRating,
-      title: formTitle,
-      comment: formComment,
-      aiEnhanced: formComment.length > 150,
-      helpful: 0,
-      notHelpful: 0,
-      createdAt: new Date().toISOString(),
-      sentiment,
-      userRole: formRole,
-    };
+    const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Anonymous User";
+    const userEmail = user?.email || "user@loopai.app";
 
-    addCustomerReview(newReview);
+    // Try to save to database
+    if (user?.id) {
+      const { data, error } = await supabase
+        .from("customer_reviews")
+        .insert({
+          user_id: user.id,
+          user_email: userEmail,
+          user_name: userName,
+          avatar_url: user.user_metadata?.avatar_url || null,
+          feature_id: formFeature,
+          rating: formRating,
+          title: formTitle,
+          review_text: formComment,
+          sentiment,
+          user_role: formRole,
+          ai_enhanced: formComment.length > 150,
+        } as any)
+        .select()
+        .single();
+
+      if (data) {
+        const mapped: CustomerReview = {
+          id: (data as any).id,
+          featureId: formFeature,
+          userName,
+          userEmail,
+          rating: formRating,
+          title: formTitle,
+          comment: formComment,
+          aiEnhanced: formComment.length > 150,
+          helpful: 0,
+          notHelpful: 0,
+          createdAt: (data as any).created_at,
+          sentiment,
+          userRole: formRole,
+        };
+        setDbReviews(prev => [mapped, ...prev]);
+        // Update localStorage backup
+        const cached = JSON.parse(localStorage.getItem("loopai_reviews") || "[]");
+        localStorage.setItem("loopai_reviews", JSON.stringify([mapped, ...cached]));
+
+        // Log activity
+        await supabase.from("activity_logs").insert({
+          user_id: user.id,
+          user_email: userEmail,
+          action: "submit_review",
+          page: "/app/feedback",
+          details: { rating: formRating, sentiment } as any,
+        });
+
+        toast.success("Review submitted successfully!");
+      } else {
+        // Fallback to local
+        const localReview: CustomerReview = {
+          id: `r-${Date.now()}`,
+          featureId: formFeature,
+          userName,
+          userEmail,
+          rating: formRating,
+          title: formTitle,
+          comment: formComment,
+          aiEnhanced: formComment.length > 150,
+          helpful: 0,
+          notHelpful: 0,
+          createdAt: new Date().toISOString(),
+          sentiment,
+          userRole: formRole,
+        };
+        addCustomerReview(localReview);
+        const cached = JSON.parse(localStorage.getItem("loopai_reviews") || "[]");
+        localStorage.setItem("loopai_reviews", JSON.stringify([localReview, ...cached]));
+        toast.success("Review saved locally");
+      }
+    } else {
+      // Not logged in - save to context only
+      const newReview: CustomerReview = {
+        id: `r-${Date.now()}`,
+        featureId: formFeature,
+        userName: "Anonymous User",
+        userEmail: "user@loopai.app",
+        rating: formRating,
+        title: formTitle,
+        comment: formComment,
+        aiEnhanced: formComment.length > 150,
+        helpful: 0,
+        notHelpful: 0,
+        createdAt: new Date().toISOString(),
+        sentiment,
+        userRole: formRole,
+      };
+      addCustomerReview(newReview);
+      toast.success("Review submitted successfully!");
+    }
+
     logAct("feedback_review", "customer-feedback");
     setShowForm(false);
     setFormRating(0);
     setFormTitle("");
     setFormComment("");
-    toast.success("Review submitted successfully!");
   };
 
   return (

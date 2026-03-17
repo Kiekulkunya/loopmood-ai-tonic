@@ -7,6 +7,7 @@ import { AppProvider } from "@/contexts/AppContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ValuationProvider } from "@/contexts/ValuationContext";
 import { DisplayProvider } from "@/contexts/DisplayContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AuthRedirect from "@/components/AuthRedirect";
 import AppLayout from "@/components/AppLayout";
@@ -38,10 +39,11 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AuthProvider>
-        <AppProvider>
-          <ValuationProvider>
-            <DisplayProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppProvider>
+            <ValuationProvider>
+              <DisplayProvider>
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<LandingPage />} />
@@ -74,10 +76,11 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
-            </DisplayProvider>
-          </ValuationProvider>
-        </AppProvider>
-      </AuthProvider>
+              </DisplayProvider>
+            </ValuationProvider>
+          </AppProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
