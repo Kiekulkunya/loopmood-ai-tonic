@@ -208,18 +208,33 @@ export default function AppLayout() {
               })}
             </nav>
 
-            {/* Bottom */}
-            <div className="border-t border-border p-2 space-y-0.5">
+            {/* Bottom — User info + Sign Out */}
+            <div className="border-t border-border p-2 space-y-1">
+              {!collapsed && (
+                <div className="flex items-center gap-2.5 px-2.5 py-2">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                    {userInitials}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium text-foreground truncate">{userName}</div>
+                    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                      isPM ? "bg-accent/15 text-accent" : "bg-primary/15 text-primary"
+                    }`}>
+                      {isPM ? "PM" : "USER"}
+                    </span>
+                  </div>
+                </div>
+              )}
               <button className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
                 <Settings size={16} className="shrink-0" />
                 {!collapsed && <span>Settings</span>}
               </button>
               <button
-                onClick={() => navigate("/")}
+                onClick={async () => { await signOut(); navigate("/login"); }}
                 className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-destructive transition-colors"
               >
                 <LogOut size={16} className="shrink-0" />
-                {!collapsed && <span>Logout</span>}
+                {!collapsed && <span>Sign Out</span>}
               </button>
             </div>
           </aside>
