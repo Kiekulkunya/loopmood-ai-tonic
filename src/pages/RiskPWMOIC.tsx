@@ -280,6 +280,13 @@ export default function RiskPWMOIC() {
         </div>
       )}
 
+      {!shareOk && shareMode === "custom" && (
+        <div className="flex items-center gap-2.5 bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-2.5">
+          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+          <p className="text-xs text-amber-400 font-semibold">Market Share total = {shareTotal.toFixed(1)}% — must equal 100%. PWMOIC computation is paused.</p>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-4">
         <Card className="bg-[#111827] border-[#1E293B]">
           <CardContent className="p-4">
