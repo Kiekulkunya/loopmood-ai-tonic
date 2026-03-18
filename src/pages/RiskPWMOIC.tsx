@@ -182,6 +182,10 @@ export default function RiskPWMOIC() {
   const investTotal = investPcts.reduce((a, b) => a + b, 0);
   const investOk = Math.abs(investTotal - 100) < 0.1;
 
+  const shareTotal = shares.reduce((a, b) => a + b, 0);
+  const shareOk = Math.abs(shareTotal - 100) < 0.1;
+  const allInputsOk = investOk && shareOk;
+
   const probs = useMemo(() => {
     const es = cS * eS, ef = cS * (1 - eS), ms = es * mS, mf = es * (1 - mS);
     return [ms * 0.2, ms * 0.3, ms * 0.5, mf * 0.3, mf * 0.7, ef, 1 - cS];
