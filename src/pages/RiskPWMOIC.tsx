@@ -339,7 +339,9 @@ export default function RiskPWMOIC() {
                 </div>
               ))}
             </div>
-            <div className="text-right mt-2 text-[9px] text-slate-500">Total: {shares.reduce((a, b) => a + b, 0).toFixed(1)}%</div>
+            <div className={`text-right mt-2 text-[9px] ${shareOk ? "text-emerald-400" : "text-amber-400 font-semibold"}`}>
+              Total: {shareTotal.toFixed(1)}%{!shareOk && " ⚠ Must equal 100%"}
+            </div>
           </CardContent>
         </Card>
 
