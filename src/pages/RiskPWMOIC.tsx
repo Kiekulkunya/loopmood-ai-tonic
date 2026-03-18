@@ -212,6 +212,14 @@ export default function RiskPWMOIC() {
   };
 
   const handleCalc = () => {
+    if (!shareOk) {
+      toast.error(`Market Share total = ${shareTotal.toFixed(1)}% — must equal 100% before computing PWMOIC.`);
+      return;
+    }
+    if (!investOk) {
+      toast.error(`Investment CAP total = ${investTotal.toFixed(1)}% — must equal 100% before computing PWMOIC.`);
+      return;
+    }
     setIsCalc(true); setCalculated(false);
     setTimeout(() => { setCalculated(true); setIsCalc(false); toast.success("PWMOIC calculated"); }, 800);
   };
