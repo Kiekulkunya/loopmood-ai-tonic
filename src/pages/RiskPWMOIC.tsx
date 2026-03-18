@@ -182,6 +182,10 @@ export default function RiskPWMOIC() {
   const investTotal = investPcts.reduce((a, b) => a + b, 0);
   const investOk = Math.abs(investTotal - 100) < 0.1;
 
+  const shareTotal = shares.reduce((a, b) => a + b, 0);
+  const shareOk = Math.abs(shareTotal - 100) < 0.1;
+  const allInputsOk = investOk && shareOk;
+
   const probs = useMemo(() => {
     const es = cS * eS, ef = cS * (1 - eS), ms = es * mS, mf = es * (1 - mS);
     return [ms * 0.2, ms * 0.3, ms * 0.5, mf * 0.3, mf * 0.7, ef, 1 - cS];
@@ -208,6 +212,14 @@ export default function RiskPWMOIC() {
   };
 
   const handleCalc = () => {
+    if (!shareOk) {
+      toast.error(`Market Share total = ${shareTotal.toFixed(1)}% — must equal 100% before computing PWMOIC.`);
+      return;
+    }
+    if (!investOk) {
+      toast.error(`Investment CAP total = ${investTotal.toFixed(1)}% — must equal 100% before computing PWMOIC.`);
+      return;
+    }
     setIsCalc(true); setCalculated(false);
     setTimeout(() => { setCalculated(true); setIsCalc(false); toast.success("PWMOIC calculated"); }, 800);
   };
@@ -265,6 +277,13 @@ export default function RiskPWMOIC() {
         <div className="flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2.5">
           <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
           <p className="text-xs text-red-400 font-semibold">Investment CAP total = {investTotal.toFixed(1)}% — must equal 100%.</p>
+        </div>
+      )}
+
+      {!shareOk && shareMode === "custom" && (
+        <div className="flex items-center gap-2.5 bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-2.5">
+          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+          <p className="text-xs text-amber-400 font-semibold">Market Share total = {shareTotal.toFixed(1)}% — must equal 100%. PWMOIC computation is paused.</p>
         </div>
       )}
 
@@ -327,7 +346,9 @@ export default function RiskPWMOIC() {
                 </div>
               ))}
             </div>
-            <div className="text-right mt-2 text-[9px] text-slate-500">Total: {shares.reduce((a, b) => a + b, 0).toFixed(1)}%</div>
+            <div className={`text-right mt-2 text-[9px] ${shareOk ? "text-emerald-400" : "text-amber-400 font-semibold"}`}>
+              Total: {shareTotal.toFixed(1)}%{!shareOk && " ⚠ Must equal 100%"}
+            </div>
           </CardContent>
         </Card>
 
