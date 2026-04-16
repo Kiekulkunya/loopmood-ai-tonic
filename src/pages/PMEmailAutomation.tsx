@@ -549,7 +549,32 @@ export default function PMEmailAutomation() {
               <div className="flex items-center justify-between mb-3 py-2 px-3 rounded-lg bg-background border border-border">
                 <span className="text-xs text-foreground">Auto-send</span>
                 <button
-                  onClick={() => setConfig((p) => ({ ...p, enabled: !p.enabled }))}
+                  onClick={async () => {
+                    const newEnabled = !config.enabled;
+                    if (!newEnabled) {
+                      // Remove the cron job on the server
+                      try {
+                        const supabaseUrl = `https://ssffuvezgexthcppxfhn.supabase.co/functions/v1/manage-email-schedule`;
+                        const response = await fetch(supabaseUrl, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ action: "remove" }),
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                          toast.success("Auto-send disabled — scheduled emails stopped");
+                        } else {
+                          toast.error(`Failed to disable schedule: ${result.error || "Unknown error"}`);
+                          return; // Don't toggle if server failed
+                        }
+                      } catch (err: any) {
+                        toast.error(`Failed to disable schedule: ${err.message || "Network error"}`);
+                        return;
+                      }
+                      setScheduleConfirmed(false);
+                    }
+                    setConfig((p) => ({ ...p, enabled: newEnabled }));
+                  }}
                   className={`w-10 h-5 rounded-full transition-colors relative ${config.enabled ? "bg-accent" : "bg-muted"}`}
                 >
                   <div className="w-4 h-4 rounded-full bg-foreground absolute top-0.5 transition-all" style={{ left: config.enabled ? 22 : 2 }} />
